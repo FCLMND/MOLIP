@@ -1178,12 +1178,13 @@ let shopZoom = 0.35;
     document.body.classList.add('native-fullscreen');
     if (fsBtn) setControlLabel(fsBtn, 'Exit Fullscreen');
     if (fsWrap) fsWrap.classList.add('active');
-    if (vEl && fsVideo && fsCanvas && vEl.src) {
-      fsVideo.src = vEl.src;
-      fsVideo.currentTime = vEl.currentTime;
+    const activeVisual = isArchiveShopAudioActive() && shopVisual ? shopVisual : vEl;
+    if (activeVisual && fsVideo && fsCanvas && activeVisual.src) {
+      fsVideo.src = activeVisual.src;
+      fsVideo.currentTime = activeVisual.currentTime;
       fsVideo.style.display = 'block';
       fsCanvas.style.display = 'none';
-      if (!vEl.paused) playMedia(fsVideo);
+      if (!activeVisual.paused) playMedia(fsVideo);
     } else if (fsVideo && fsCanvas) {
       fsVideo.style.display = 'none';
       fsCanvas.style.display = 'block';
