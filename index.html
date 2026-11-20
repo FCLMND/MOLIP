@@ -134,9 +134,9 @@
       font: 13px -apple-system, BlinkMacSystemFont, sans-serif;
       white-space: nowrap; background: rgba(18, 18, 22, 0.72);
       border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 999px;
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       opacity: 0; pointer-events: none; transform: translate(-50%, 8px);
-      transition: opacity 0.28s ease, transform 0.28s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
     #breathing-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
     @media (prefers-reduced-motion: reduce) {
@@ -298,7 +298,7 @@
     </div>
   </div>
 
-  <div id="breathing-toast" role="status" aria-live="polite" aria-hidden="true">Breathing meditation — Coming soon</div>
+  <div id="breathing-toast" role="status" aria-live="polite" aria-hidden="true">Breathwork — Coming Soon</div>
   <div id="td-fs-wrap">
     <video id="td-fs-video" loop muted preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
     <canvas id="td-fs-canvas" width="1024" height="576"></canvas>

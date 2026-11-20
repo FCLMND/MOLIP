@@ -944,7 +944,7 @@ let shopZoom = 0.35;
       breathingToastTimer = window.setTimeout(() => {
         breathingToast.classList.remove('is-visible');
         breathingToast.setAttribute('aria-hidden', 'true');
-      }, 2000);
+      }, 2500);
     });
   }
 
