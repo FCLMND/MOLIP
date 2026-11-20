@@ -1,10 +1,202 @@
 (function() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'fclmnd';
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const BOOK_DETAILS = {
+    creativeAct: {
+      cover: 'media/book1.jpg',
+      titleEn: 'The Creative Act: A Way of Being',
+      subtitleKo: '창조적 행위: 존재의 방식',
+      author: 'Rick Rubin · 릭 루빈',
+      curationNoteEn: 'Curation note coming soon.',
+      curationNoteKo: '큐레이션 노트를 준비 중입니다.',
+      excerptEn: 'Selected excerpt coming soon.',
+      excerptKo: '발췌문을 준비 중입니다.',
+      archiveNoteEn: 'Sound note coming soon.',
+      archiveNoteKo: '공간 사운드 노트를 준비 중입니다.'
+    }
+  };
+  const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
+  const BOOK_DETAIL_EDITABLE_FIELDS = [
+    'curationNoteEn', 'curationNoteKo', 'excerptEn',
+    'excerptKo', 'archiveNoteEn', 'archiveNoteKo'
+  ];
+  let bookDetails = { ...BOOK_DETAILS.creativeAct };
+  try {
+    const savedBookDetails = localStorage.getItem(BOOK_DETAILS_STORAGE_KEY);
+    if (savedBookDetails) {
+      const parsedBookDetails = JSON.parse(savedBookDetails);
+      const savedCreativeAct = parsedBookDetails && parsedBookDetails.creativeAct;
+      if (savedCreativeAct && typeof savedCreativeAct === 'object' && !Array.isArray(savedCreativeAct)) {
+        BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
+          if (typeof savedCreativeAct[field] === 'string') bookDetails[field] = savedCreativeAct[field];
+        });
+      }
+    }
+  } catch (error) {
+    console.warn('Book curation details could not be loaded:', error);
+  }
   const fsBtn = document.getElementById('fs-btn');
   const spaceFullscreenBtn = document.getElementById('space-fullscreen-btn');
   if (isStandalone && fsBtn) fsBtn.style.setProperty('display', 'none', 'important');
   if (isStandalone && spaceFullscreenBtn) spaceFullscreenBtn.style.setProperty('display', 'none', 'important');
+  const bookDetailOverlay = document.getElementById('book-detail-overlay');
+  const bookDetailsCard = document.getElementById('book-details-card');
+  const bookPageElements = bookDetailOverlay ? [...bookDetailOverlay.querySelectorAll('[data-book-page]')] : [];
+  const bookPageIndicator = document.getElementById('book-page-indicator');
+  const bookPagePrev = document.getElementById('book-page-prev');
+  const bookPageNext = document.getElementById('book-page-next');
+  const bookAdminEditButton = document.getElementById('book-admin-edit-btn');
+  const bookAdminEditor = document.getElementById('book-admin-editor');
+  let activeBookPage = 0;
+  const bookDetailTextElements = {
+    titleEn: document.getElementById('book-title-en'),
+    subtitleKo: document.getElementById('book-title-ko'),
+    author: document.getElementById('book-author'),
+    curationNoteEn: document.getElementById('book-curation-en'),
+    curationNoteKo: document.getElementById('book-curation-ko'),
+    excerptEn: document.getElementById('book-excerpt-en'),
+    excerptKo: document.getElementById('book-excerpt-ko'),
+    archiveNoteEn: document.getElementById('book-archive-note-en'),
+    archiveNoteKo: document.getElementById('book-archive-note-ko')
+  };
+  function renderBookDetails() {
+    Object.entries(bookDetailTextElements).forEach(([field, element]) => {
+      if (element) element.textContent = bookDetails[field] || '';
+    });
+    const cover = document.getElementById('book-cover');
+    if (cover) {
+      cover.src = bookDetails.cover;
+      cover.alt = `${bookDetails.titleEn} book cover`;
+    }
+  }
+  function setBookDetailPage(pageIndex) {
+    activeBookPage = Math.max(0, Math.min(1, pageIndex));
+    bookPageElements.forEach((page, index) => {
+      const isActive = index === activeBookPage;
+      page.classList.toggle('is-active', isActive);
+      page.setAttribute('aria-hidden', String(!isActive));
+      if (isActive) page.scrollTop = 0;
+    });
+    if (bookPageIndicator) bookPageIndicator.textContent = `${activeBookPage + 1} / 2`;
+    if (bookPagePrev) bookPagePrev.disabled = activeBookPage === 0;
+    if (bookPageNext) bookPageNext.disabled = activeBookPage === 1;
+  }
+  function openBookDetailsModal(bookId) {
+    if (bookId !== 'creativeAct' || !bookDetailOverlay || !bookDetailsCard) return false;
+    renderBookDetails();
+    setBookDetailPage(0);
+    if (bookAdminEditButton) bookAdminEditButton.hidden = !isAdmin;
+    if (bookAdminEditor) bookAdminEditor.hidden = true;
+    bookDetailsCard.classList.remove('is-editing');
+    bookDetailOverlay.setAttribute('aria-hidden', 'false');
+    window.requestAnimationFrame(() => bookDetailOverlay.classList.add('is-open'));
+    return true;
+  }
+  function closeBookDetailsModal() {
+    if (!bookDetailOverlay) return;
+    bookDetailOverlay.classList.remove('is-open');
+    bookDetailOverlay.setAttribute('aria-hidden', 'true');
+    if (bookAdminEditor) bookAdminEditor.hidden = true;
+    if (bookDetailsCard) bookDetailsCard.classList.remove('is-editing');
+  }
+  if (bookDetailOverlay) {
+    bookDetailOverlay.addEventListener('click', event => {
+      if (event.target === bookDetailOverlay) closeBookDetailsModal();
+    });
+  }
+  const bookModalClose = document.getElementById('book-modal-close');
+  if (bookModalClose) bookModalClose.addEventListener('click', closeBookDetailsModal);
+  if (bookPagePrev) bookPagePrev.addEventListener('click', () => setBookDetailPage(activeBookPage - 1));
+  if (bookPageNext) bookPageNext.addEventListener('click', () => setBookDetailPage(activeBookPage + 1));
+  let bookSwipeStart = null;
+  const bookModalPages = document.getElementById('book-modal-pages');
+  if (bookModalPages) {
+    bookModalPages.addEventListener('touchstart', event => {
+      const touch = event.changedTouches.item(0);
+      if (touch) bookSwipeStart = { x: touch.clientX, y: touch.clientY };
+    }, { passive: true });
+    bookModalPages.addEventListener('touchend', event => {
+      const touch = event.changedTouches.item(0);
+      if (!touch || !bookSwipeStart || (bookAdminEditor && !bookAdminEditor.hidden)) return;
+      const deltaX = touch.clientX - bookSwipeStart.x;
+      const deltaY = touch.clientY - bookSwipeStart.y;
+      if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        setBookDetailPage(activeBookPage + (deltaX < 0 ? 1 : -1));
+      }
+      bookSwipeStart = null;
+    }, { passive: true });
+  }
+  document.addEventListener('keydown', event => {
+    if (!bookDetailOverlay || !bookDetailOverlay.classList.contains('is-open')) return;
+    if (event.key === 'Escape') closeBookDetailsModal();
+    else if (!bookAdminEditor || bookAdminEditor.hidden) {
+      if (event.key === 'ArrowRight') setBookDetailPage(activeBookPage + 1);
+      else if (event.key === 'ArrowLeft') setBookDetailPage(activeBookPage - 1);
+    }
+  });
+  if (isAdmin && bookAdminEditButton && bookAdminEditor && bookDetailsCard) {
+    const bookEditorInputs = {
+      curationNoteEn: document.getElementById('book-edit-curation-en'),
+      curationNoteKo: document.getElementById('book-edit-curation-ko'),
+      excerptEn: document.getElementById('book-edit-excerpt-en'),
+      excerptKo: document.getElementById('book-edit-excerpt-ko'),
+      archiveNoteEn: document.getElementById('book-edit-archive-note-en'),
+      archiveNoteKo: document.getElementById('book-edit-archive-note-ko')
+    };
+    const bookEditorStatus = document.getElementById('book-editor-status');
+    const bookEditorClose = document.getElementById('book-editor-close');
+    const bookEditorPreview = document.getElementById('book-editor-preview');
+    const bookEditorCopy = document.getElementById('book-editor-copy');
+    bookAdminEditButton.addEventListener('click', () => {
+      BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
+        if (bookEditorInputs[field]) bookEditorInputs[field].value = bookDetails[field];
+      });
+      if (bookEditorStatus) bookEditorStatus.textContent = '';
+      bookAdminEditor.hidden = false;
+      bookDetailsCard.classList.add('is-editing');
+    });
+    if (bookEditorClose) bookEditorClose.addEventListener('click', () => {
+      bookAdminEditor.hidden = true;
+      bookDetailsCard.classList.remove('is-editing');
+    });
+    if (bookEditorPreview) bookEditorPreview.addEventListener('click', () => {
+      BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
+        if (bookEditorInputs[field]) bookDetails[field] = bookEditorInputs[field].value;
+      });
+      renderBookDetails();
+      try {
+        localStorage.setItem(BOOK_DETAILS_STORAGE_KEY, JSON.stringify({ creativeAct: bookDetails }));
+        bookAdminEditor.hidden = true;
+        bookDetailsCard.classList.remove('is-editing');
+        if (bookEditorStatus) bookEditorStatus.textContent = '미리보기에 적용하고 저장했습니다.';
+      } catch (error) {
+        console.warn('Book curation details could not be saved:', error);
+        if (bookEditorStatus) bookEditorStatus.textContent = '저장에 실패했습니다. 브라우저 저장 공간을 확인해 주세요.';
+      }
+    });
+    if (bookEditorCopy) bookEditorCopy.addEventListener('click', () => {
+      const exportData = { ...BOOK_DETAILS.creativeAct };
+      BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
+        if (bookEditorInputs[field]) exportData[field] = bookEditorInputs[field].value;
+      });
+      const sourceCode = `const BOOK_DETAILS = ${JSON.stringify({ creativeAct: exportData }, null, 2)};`;
+      if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+        if (bookEditorStatus) bookEditorStatus.textContent = '이 브라우저에서는 클립보드 복사를 지원하지 않습니다.';
+        return;
+      }
+      try {
+        navigator.clipboard.writeText(sourceCode).then(() => {
+          if (bookEditorStatus) bookEditorStatus.textContent = 'BOOK_DETAILS 코드를 복사했습니다.';
+        }).catch(error => {
+          console.warn('Book details code could not be copied:', error);
+          if (bookEditorStatus) bookEditorStatus.textContent = '복사할 수 없습니다. 브라우저 권한을 확인해 주세요.';
+        });
+      } catch (error) {
+        console.warn('Book details code could not be copied:', error);
+        if (bookEditorStatus) bookEditorStatus.textContent = '복사할 수 없습니다. 브라우저 권한을 확인해 주세요.';
+      }
+    });
+  }
   const introLoader = document.getElementById('molip-loader');
   const introProgressBar = document.getElementById('molip-loader-progress');
   const introProgressTrack = document.getElementById('molip-loader-track');
@@ -878,6 +1070,7 @@ let shopZoom = 0.35;
       if (shopHits.length > 0 && archiveShop) {
         const hitItem = shopHits.at(0).object.userData.shopItem;
         if (hitItem) {
+          if (openBookDetailsModal(hitItem.bookId)) return;
           archiveShop.openItemModal(hitItem);
           return;
         }

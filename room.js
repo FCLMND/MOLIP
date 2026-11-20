@@ -1550,7 +1550,7 @@ window.ArchiveShop = {
     // 선반 뒤쪽 절반: 다국어 큐레이션 도서 2개 층 진열
     const paperPageMat = new THREE.MeshStandardMaterial({ color: 0xebe5d8, roughness: 0.90 });
     const bookItems = [
-      { img: 'book1', title: 'The Creative Act: A Way of Being', sub: 'Rick Rubin · 창작과 예술', bg: '#d6d5ca', accent: '#202020', desc: '창작의 태도와 예술적 영감을 다룬 릭 루빈의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
+      { id: 'creativeAct', img: 'book1', title: 'The Creative Act: A Way of Being', sub: 'Rick Rubin · 창작과 예술', bg: '#d6d5ca', accent: '#202020', desc: '창작의 태도와 예술적 영감을 다룬 릭 루빈의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
       { img: 'book2', title: '마쿠라노소시 (枕草子)', sub: '세이 쇼나곤 · 고전 일본 문학', bg: '#e6d58f', accent: '#161616', desc: '헤이안 시대 궁중 생활과 사색을 담은 일본 고전 수필입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }, { label: '🇯🇵 日本語 電子書籍 (Kindle JP)', url: 'https://amazon.co.jp' }] },
       { img: 'book3', title: '해석에 반하여 (Against Interpretation)', sub: '수전 손택 · 비평 에세이', bg: '#171717', accent: '#d1d5db', desc: '예술과 감상의 관습을 새롭게 바라보는 수전 손택의 대표 에세이집입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
       { img: 'book4', title: '사진에 관하여 (On Photography)', sub: '수전 손택 · 사진과 비평', bg: '#eeeae3', accent: '#b83232', desc: '사진의 의미와 이미지가 사회에 미치는 영향을 탐구한 비평 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
@@ -1667,7 +1667,7 @@ window.ArchiveShop = {
         bookGroup.position.set(bk.x, bk.y, rightWallZ + 0.14);
         bookGroup.rotation.x = -0.08;
         addRectContactShadow(shopGroup, bk.x + 0.035, bk.y - 0.035, rightWallZ + 0.094, 0.34, 0.42);
-        frontBoard.userData.shopItem = { category: 'MULTILINGUAL E-BOOK CURATION', title: bk.title, subtitle: bk.sub, description: bk.desc, links: bk.links };
+        frontBoard.userData.shopItem = { bookId: bk.id, category: 'MULTILINGUAL E-BOOK CURATION', title: bk.title, subtitle: bk.sub, description: bk.desc, links: bk.links };
         clickables.push(frontBoard);
         shopGroup.add(bookGroup);
       });
