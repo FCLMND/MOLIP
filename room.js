@@ -1512,10 +1512,10 @@ window.ArchiveShop = {
 
     // 선반 앞쪽 절반: 음반(LP) 2개 층 진열 (./media/lp1.jpeg ~ lp4.jpeg 순환 적용)
     const vinylItems = [
-      { img: 'lp1', title: 'SANCTUARY VOL.01', sub: 'Ambient & Field Recordings (LP)', bg: '#1c1d21', accent: '#d97736', desc: '리스닝룸의 밤과 공간 잔향을 담은 바이닐 에디션입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }, { label: 'Spotify 스트리밍', url: 'https://spotify.com' }] },
-      { img: 'lp2', title: 'STILLNESS IN WOOD', sub: 'Electro-Acoustic Sessions (LP)', bg: '#2b1810', accent: '#e0a96d', desc: '진공관 앰프와 원목 디퓨저의 울림을 녹음한 180g LP입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }, { label: 'Apple Music 스트리밍', url: 'https://apple.com' }] },
-      { img: 'lp3', title: 'KYOTO RAIN TAPE', sub: 'Analog Cassette & Digital', bg: '#1a2421', accent: '#65c938', desc: '비 내리는 정원의 소리와 신시사이저를 결합한 앨범입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }] },
-      { img: 'lp4', title: 'NOCTURNE STUDY', sub: 'Minimal Piano & Modular (LP)', bg: '#231f20', accent: '#93c5fd', desc: '깊은 새벽 사색과 독서를 위해 작곡된 미니멀 피아노 음반입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }] }
+      { itemId: 'sanctuary-vol-01', img: 'lp1', cover: 'media/lp1.jpg', title: 'SANCTUARY VOL.01', sub: 'Ambient & Field Recordings (LP)', artist: '', bg: '#1c1d21', accent: '#d97736', desc: '리스닝룸의 밤과 공간 잔향을 담은 바이닐 에디션입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }, { label: 'Spotify 스트리밍', url: 'https://spotify.com' }] },
+      { itemId: 'stillness-in-wood', img: 'lp2', cover: 'media/lp2.jpg', title: 'STILLNESS IN WOOD', sub: 'Electro-Acoustic Sessions (LP)', artist: '', bg: '#2b1810', accent: '#e0a96d', desc: '진공관 앰프와 원목 디퓨저의 울림을 녹음한 180g LP입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }, { label: 'Apple Music 스트리밍', url: 'https://apple.com' }] },
+      { itemId: 'kyoto-rain-tape', img: 'lp3', cover: 'media/lp3.jpg', title: 'KYOTO RAIN TAPE', sub: 'Analog Cassette & Digital', artist: '', bg: '#1a2421', accent: '#65c938', desc: '비 내리는 정원의 소리와 신시사이저를 결합한 앨범입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }] },
+      { itemId: 'nocturne-study', img: 'lp4', cover: '', title: 'NOCTURNE STUDY', sub: 'Minimal Piano & Modular (LP)', artist: '', bg: '#231f20', accent: '#93c5fd', desc: '깊은 새벽 사색과 독서를 위해 작곡된 미니멀 피아노 음반입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }] }
     ];
     const displayXOffsets = [1.9, 2.6, 3.3, 4.0, 4.7];
     [2.02, 1.35].forEach(y => displayXOffsets.forEach((offset, index) => {
@@ -1542,19 +1542,36 @@ window.ArchiveShop = {
       lpGroup.position.set(item.x, item.y, rightWallZ + 0.14);
       lpGroup.rotation.x = -0.08;
       addRectContactShadow(shopGroup, item.x + 0.035, item.y - 0.035, rightWallZ + 0.094, 0.44, 0.42);
-      sleeve.userData.shopItem = { category: 'VINYL & SOUND ARCHIVE', title: item.title, subtitle: item.sub, description: item.desc, links: item.links };
-      clickables.push(sleeve);
+      const coverImage = sleeveMat.map && sleeveMat.map.image instanceof HTMLCanvasElement
+        ? sleeveMat.map.image.toDataURL('image/png')
+        : '';
+      const shopItem = {
+        itemId: item.itemId,
+        itemType: 'album',
+        titleEn: item.sub,
+        subtitleKo: item.title,
+        artist: item.artist,
+        cover: item.cover || coverImage,
+        category: 'VINYL & SOUND ARCHIVE',
+        title: item.title,
+        subtitle: item.sub,
+        description: item.desc,
+        links: item.links
+      };
+      sleeve.userData.shopItem = shopItem;
+      disc.userData.shopItem = shopItem;
+      clickables.push(sleeve, disc);
       shopGroup.add(lpGroup);
     }));
 
     // 선반 뒤쪽 절반: 다국어 큐레이션 도서 2개 층 진열
     const paperPageMat = new THREE.MeshStandardMaterial({ color: 0xebe5d8, roughness: 0.90 });
     const bookItems = [
-      { id: 'creativeAct', img: 'book1', title: 'The Creative Act: A Way of Being', sub: 'Rick Rubin · 창작과 예술', bg: '#d6d5ca', accent: '#202020', desc: '창작의 태도와 예술적 영감을 다룬 릭 루빈의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
-      { img: 'book2', title: '마쿠라노소시 (枕草子)', sub: '세이 쇼나곤 · 고전 일본 문학', bg: '#e6d58f', accent: '#161616', desc: '헤이안 시대 궁중 생활과 사색을 담은 일본 고전 수필입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }, { label: '🇯🇵 日本語 電子書籍 (Kindle JP)', url: 'https://amazon.co.jp' }] },
-      { img: 'book3', title: '해석에 반하여 (Against Interpretation)', sub: '수전 손택 · 비평 에세이', bg: '#171717', accent: '#d1d5db', desc: '예술과 감상의 관습을 새롭게 바라보는 수전 손택의 대표 에세이집입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
-      { img: 'book4', title: '사진에 관하여 (On Photography)', sub: '수전 손택 · 사진과 비평', bg: '#eeeae3', accent: '#b83232', desc: '사진의 의미와 이미지가 사회에 미치는 영향을 탐구한 비평 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
-      { img: 'book5', title: '베를린 일기', sub: '최민석 · 여행 에세이', bg: '#eaa6bb', accent: '#2d2930', desc: '베를린에서의 일상과 여행을 담은 최민석의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] }
+      { id: 'creativeAct', itemId: 'creativeAct', itemType: 'book', cover: 'media/book1.jpg', titleEn: 'The Creative Act: A Way of Being', subtitleKo: '창조적 행위: 존재의 방식', author: '릭 루빈 · Rick Rubin', img: 'book1', title: 'The Creative Act: A Way of Being', sub: 'Rick Rubin · 창작과 예술', bg: '#d6d5ca', accent: '#202020', desc: '창작의 태도와 예술적 영감을 다룬 릭 루빈의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
+      { itemId: 'pillow-book', itemType: 'book', cover: 'media/book2.jpg', titleEn: 'The Pillow Book', subtitleKo: '마쿠라노소시 (枕草子)', author: '세이 쇼나곤 · 고전 일본 문학', img: 'book2', title: '마쿠라노소시 (枕草子)', sub: '세이 쇼나곤 · 고전 일본 문학', bg: '#e6d58f', accent: '#161616', desc: '헤이안 시대 궁중 생활과 사색을 담은 일본 고전 수필입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }, { label: '🇯🇵 日本語 電子書籍 (Kindle JP)', url: 'https://amazon.co.jp' }] },
+      { itemId: 'against-interpretation', itemType: 'book', cover: 'media/book3.png', titleEn: 'Against Interpretation', subtitleKo: '해석에 반하여', author: '수전 손택 · 비평 에세이', img: 'book3', title: '해석에 반하여 (Against Interpretation)', sub: '수전 손택 · 비평 에세이', bg: '#171717', accent: '#d1d5db', desc: '예술과 감상의 관습을 새롭게 바라보는 수전 손택의 대표 에세이집입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
+      { itemId: 'on-photography', itemType: 'book', cover: 'media/book4.png', titleEn: 'On Photography', subtitleKo: '사진에 관하여', author: '수전 손택 · 사진과 비평', img: 'book4', title: '사진에 관하여 (On Photography)', sub: '수전 손택 · 사진과 비평', bg: '#eeeae3', accent: '#b83232', desc: '사진의 의미와 이미지가 사회에 미치는 영향을 탐구한 비평 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] },
+      { id: 'berlin-diary', itemId: 'berlin-diary', itemType: 'book', cover: 'media/book5.png', titleEn: 'Berlin Diary', subtitleKo: '베를린 일기', author: '최민석 · Choi Min-seok', img: 'book5', title: '베를린 일기', sub: '최민석 · 여행 에세이', bg: '#eaa6bb', accent: '#2d2930', desc: '베를린에서의 일상과 여행을 담은 최민석의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] }
     ];
     const bookXOffsets = [5.5, 6.2, 6.9, 7.6, 8.3];
     const coffeeXOffsets = [6.16, 6.58, 7.00, 7.42];
@@ -1667,8 +1684,24 @@ window.ArchiveShop = {
         bookGroup.position.set(bk.x, bk.y, rightWallZ + 0.14);
         bookGroup.rotation.x = -0.08;
         addRectContactShadow(shopGroup, bk.x + 0.035, bk.y - 0.035, rightWallZ + 0.094, 0.34, 0.42);
-        frontBoard.userData.shopItem = { bookId: bk.id, category: 'MULTILINGUAL E-BOOK CURATION', title: bk.title, subtitle: bk.sub, description: bk.desc, links: bk.links };
-        clickables.push(frontBoard);
+        const shopItem = {
+          itemId: bk.itemId || bk.id,
+          bookId: bk.id || bk.itemId,
+          itemType: bk.itemType || 'book',
+          titleEn: bk.titleEn || bk.title,
+          subtitleKo: bk.subtitleKo || bk.sub,
+          author: bk.author || '',
+          cover: bk.cover || '',
+          category: 'MULTILINGUAL E-BOOK CURATION',
+          title: bk.title,
+          subtitle: bk.sub,
+          description: bk.desc,
+          links: bk.links
+        };
+        [frontBoard, backBoard, spineBoard, pagesBlock].forEach(mesh => {
+          mesh.userData.shopItem = shopItem;
+          clickables.push(mesh);
+        });
         shopGroup.add(bookGroup);
       });
     });
@@ -1704,6 +1737,12 @@ window.ArchiveShop = {
     staticShadowCasters.push(book6Mesh);
     shopGroup.add(book6Mesh);
     book6Mesh.userData.shopItem = {
+      itemId: 'sound-of-tokyo',
+      itemType: 'book',
+      titleEn: 'Sound of Tokyo',
+      subtitleKo: 'Tokyo Guidebook',
+      author: '',
+      cover: 'media/book_6.jpeg',
       category: 'MULTILINGUAL E-BOOK CURATION',
       title: 'Sound of Tokyo',
       subtitle: 'Tokyo Guidebook',

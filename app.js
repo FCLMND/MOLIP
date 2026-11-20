@@ -1,12 +1,36 @@
 (function() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'fclmnd';
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const DEFAULT_ARCHIVE_PURCHASE_LINKS = [
+    { label: '알라딘 · Aladin', url: '' },
+    { label: '교보문고 · Kyobo', url: '' },
+    { label: '예스24 · YES24', url: '' }
+  ];
+  function createDefaultBookDetails({ cover, titleEn, subtitleKo, author, itemType = 'book' }) {
+    const isAlbum = itemType === 'album';
+    return {
+      cover,
+      titleEn,
+      subtitleKo,
+      author,
+      itemType,
+      curationNoteKo: '큐레이션 노트를 준비 중입니다.',
+      curationNoteEn: 'Curation note coming soon.',
+      excerptKo: '',
+      excerptEn: '',
+      tocKo: isAlbum ? '목차 / 트랙리스트 정보를 준비 중입니다.' : '목차 정보를 준비 중입니다.',
+      tocEn: isAlbum ? 'Contents / Tracklist coming soon.' : 'Table of contents coming soon.',
+      purchaseUrl: '',
+      purchaseLinks: DEFAULT_ARCHIVE_PURCHASE_LINKS.map(link => ({ ...link }))
+    };
+  }
   const BOOK_DETAILS = {
     "creativeAct": {
       "cover": "media/book1.jpg",
       "titleEn": "The Creative Act: A Way of Being",
       "subtitleKo": "창조적 행위: 존재의 방식",
       "author": "릭 루빈 · Rick Rubin",
+      "itemType": "book",
       "curationNoteEn": "When I first started reading this book, I was honestly a little skeptical.\n\nThe first third or so is filled with rather abstract and philosophical reflections on what creativity is, how everyone has the potential to be a creator, and the importance of observing the world around us and remaining open to our senses. Much of it felt like something I had already come to understand through my own creative practice. At times, some of the ideas seemed so obvious that I wondered whether they really needed to be stated at all.\n\nHowever, as I moved further into the book, my perspective gradually began to change.\n\nRather than focusing on philosophical declarations about creativity, the book begins to explore the challenges that arise in the actual creative process and the mindset needed to navigate them.\n\nWhat I found particularly interesting was how many of these ideas resonated with things I had independently discovered through trial and error while making music. They weren't techniques I had learned from someone else, but principles that had naturally taken shape over years of working. Seeing those experiences reflected and articulated through another creator's perspective turned out to be more meaningful than I had expected.\n\nA book I'd recommend to anyone engaged in any form of creative practice.",
       "curationNoteKo": "\n처음 이 책을 읽기 시작했을 때는 솔직히 조금 회의적이었다.\n책의 초반부 약 3분의 1까지는 창작이란 무엇인가, 누구나 창작자가 될 수 있다는 것, 주변을 관찰하고 감각을 열어두라는 식의 다소 추상적이고 원론적인 이야기들이 이어진다. 이미 창작 활동을 해오면서 스스로 체득한 생각들이기도 했고, 어쩌면 너무 당연해서 굳이 책을 통해 다시 확인할 필요가 있을까 싶은 하나마나한 내용들도 있었다.\n\n하지만 중반부를 지나면서 책을 바라보는 시선이 조금씩 달라졌다.\n 창작을 둘러싼 철학적인 선언보다는 실제 작업 과정에서 마주하게 되는 문제들과 그것을 다루는 태도에 관한 이야기들이 등장한다.\n\n 흥미로웠던 것은 그중 상당수가 내가 음악을 만들면서 혼자 시행착오를 거쳐 발견했던 것들과 상당히 맞닿아 있었다는 점이다. 누군가에게 배워서 적용했다기보다는 오랜 시간 작업하면서 자연스럽게 형성된 나름의 원칙들이었는데, 그것을 다른 창작자의 언어로 다시 확인하는 경험은 생각보다 유의미했다. \n\n당신이 어떤형태로든 창작중이라면 추천해주고싶은 도서",
       "excerptEn": "Selected excerpt coming soon.",
@@ -19,31 +43,110 @@
         { "label": "알라딘 - Aladin", "url": "https://aladin.kr/p/UQHm7" },
         { "label": "Amazon", "url": "https://a.co/d/0iuUUZeU" }
       ]
-    }
+    },
+    "berlin-diary": {
+      "cover": "media/book5.png",
+      "titleEn": "Berlin Diary",
+      "subtitleKo": "베를린 일기",
+      "author": "최민석 · Choi Min-seok",
+      "itemType": "book",
+      "curationNoteKo": "큐레이션 노트를 준비 중입니다.",
+      "curationNoteEn": "Curation note coming soon.",
+      "excerptKo": "",
+      "excerptEn": "",
+      "tocKo": "목차 정보를 준비 중입니다.",
+      "tocEn": "Table of contents coming soon.",
+      "purchaseUrl": "",
+      "purchaseLinks": [
+        { "label": "알라딘 · Aladin", "url": "" },
+        { "label": "교보문고 · Kyobo", "url": "" },
+        { "label": "예스24 · YES24", "url": "" }
+      ]
+    },
+    "pillow-book": createDefaultBookDetails({
+      cover: 'media/book2.jpg',
+      titleEn: 'The Pillow Book',
+      subtitleKo: '마쿠라노소시 (枕草子)',
+      author: '세이 쇼나곤 · 고전 일본 문학'
+    }),
+    "against-interpretation": createDefaultBookDetails({
+      cover: 'media/book3.png',
+      titleEn: 'Against Interpretation',
+      subtitleKo: '해석에 반하여',
+      author: '수전 손택 · 비평 에세이'
+    }),
+    "on-photography": createDefaultBookDetails({
+      cover: 'media/book4.png',
+      titleEn: 'On Photography',
+      subtitleKo: '사진에 관하여',
+      author: '수전 손택 · 사진과 비평'
+    }),
+    "sanctuary-vol-01": createDefaultBookDetails({
+      cover: 'media/lp1.jpg',
+      titleEn: 'Ambient & Field Recordings (LP)',
+      subtitleKo: 'SANCTUARY VOL.01',
+      author: '',
+      itemType: 'album'
+    }),
+    "stillness-in-wood": createDefaultBookDetails({
+      cover: 'media/lp2.jpg',
+      titleEn: 'Electro-Acoustic Sessions (LP)',
+      subtitleKo: 'STILLNESS IN WOOD',
+      author: '',
+      itemType: 'album'
+    }),
+    "kyoto-rain-tape": createDefaultBookDetails({
+      cover: 'media/lp3.jpg',
+      titleEn: 'Analog Cassette & Digital',
+      subtitleKo: 'KYOTO RAIN TAPE',
+      author: '',
+      itemType: 'album'
+    }),
+    "nocturne-study": createDefaultBookDetails({
+      cover: '',
+      titleEn: 'Minimal Piano & Modular (LP)',
+      subtitleKo: 'NOCTURNE STUDY',
+      author: '',
+      itemType: 'album'
+    }),
+    "sound-of-tokyo": createDefaultBookDetails({
+      cover: 'media/book_6.jpeg',
+      titleEn: 'Sound of Tokyo',
+      subtitleKo: 'Tokyo Guidebook',
+      author: 'Tokyo Guidebook'
+    })
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
   const BOOK_DETAIL_EDITABLE_FIELDS = [
     'curationNoteKo', 'curationNoteEn', 'excerptKo',
     'excerptEn', 'tocKo', 'tocEn', 'purchaseUrl'
   ];
-  let bookDetails = { ...BOOK_DETAILS.creativeAct };
+  const bookDetailsById = Object.fromEntries(
+    Object.entries(BOOK_DETAILS).map(([bookId, details]) => [bookId, { ...details }])
+  );
   try {
     const savedBookDetails = localStorage.getItem(BOOK_DETAILS_STORAGE_KEY);
     if (savedBookDetails) {
       const parsedBookDetails = JSON.parse(savedBookDetails);
-      const savedCreativeAct = parsedBookDetails && parsedBookDetails.creativeAct;
-      if (savedCreativeAct && typeof savedCreativeAct === 'object' && !Array.isArray(savedCreativeAct)) {
-        BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
-          if (typeof savedCreativeAct[field] === 'string') bookDetails[field] = savedCreativeAct[field];
+      if (parsedBookDetails && typeof parsedBookDetails === 'object' && !Array.isArray(parsedBookDetails)) {
+        Object.keys(BOOK_DETAILS).forEach(bookId => {
+          const savedBook = parsedBookDetails[bookId];
+          if (!savedBook || typeof savedBook !== 'object' || Array.isArray(savedBook)) return;
+          const currentBook = bookDetailsById[bookId];
+          BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
+            if (typeof savedBook[field] === 'string') currentBook[field] = savedBook[field];
+          });
+          if (Array.isArray(savedBook.purchaseLinks)) {
+            currentBook.purchaseLinks = savedBook.purchaseLinks.slice(0, 3);
+          }
         });
-        if (Array.isArray(savedCreativeAct.purchaseLinks)) {
-          bookDetails.purchaseLinks = savedCreativeAct.purchaseLinks.slice(0, 3);
-        }
       }
     }
   } catch (error) {
     console.warn('Book curation details could not be loaded:', error);
   }
+  let activeBookId = 'creativeAct';
+  let bookDetails = { ...bookDetailsById[activeBookId] };
   const fsBtn = document.getElementById('fs-btn');
   const spaceFullscreenBtn = document.getElementById('space-fullscreen-btn');
   if (isStandalone && fsBtn) fsBtn.style.setProperty('display', 'none', 'important');
@@ -56,6 +159,9 @@
   const bookPageNext = document.getElementById('book-page-next');
   const bookAdminEditButton = document.getElementById('book-admin-edit-btn');
   const bookAdminEditor = document.getElementById('book-admin-editor');
+  const bookTocHeading = document.getElementById('book-toc-heading');
+  const bookEditTocKoLabel = document.getElementById('book-edit-toc-ko-label');
+  const bookEditTocEnLabel = document.getElementById('book-edit-toc-en-label');
   let activeBookPage = 0;
   const bookDetailTextElements = {
     titleEn: document.getElementById('book-title-en'),
@@ -69,7 +175,7 @@
     tocEn: document.getElementById('book-toc-en')
   };
   function getConfiguredPurchaseLinks() {
-    const defaultLinks = BOOK_DETAILS.creativeAct.purchaseLinks;
+    const defaultLinks = BOOK_DETAILS[activeBookId].purchaseLinks;
     const savedLinks = Array.isArray(bookDetails.purchaseLinks) ? bookDetails.purchaseLinks : [];
     return defaultLinks.map((defaultLink, index) => {
       const savedLink = savedLinks[index];
@@ -126,8 +232,21 @@
     if (bookPagePrev) bookPagePrev.disabled = activeBookPage === 0;
     if (bookPageNext) bookPageNext.disabled = activeBookPage === 1;
   }
-  function openBookDetailsModal(bookId) {
-    if (bookId !== 'creativeAct' || !bookDetailOverlay || !bookDetailsCard) return false;
+  function openBookDetailsModal(bookId, itemMetadata) {
+    if (!Object.prototype.hasOwnProperty.call(BOOK_DETAILS, bookId) || !bookDetailOverlay || !bookDetailsCard) return false;
+    activeBookId = bookId;
+    bookDetails = { ...bookDetailsById[activeBookId] };
+    if (itemMetadata) {
+      bookDetails.titleEn = itemMetadata.titleEn || bookDetails.titleEn;
+      bookDetails.subtitleKo = itemMetadata.subtitleKo || bookDetails.subtitleKo;
+      bookDetails.author = itemMetadata.author ?? itemMetadata.artist ?? itemMetadata.subtitle ?? bookDetails.author;
+      bookDetails.cover = itemMetadata.cover || bookDetails.cover;
+      bookDetails.itemType = itemMetadata.itemType || bookDetails.itemType || 'book';
+    }
+    const isAlbum = bookDetails.itemType === 'album';
+    if (bookTocHeading) bookTocHeading.textContent = isAlbum ? '트랙리스트 · Tracklist' : '목차 · Table of Contents';
+    if (bookEditTocKoLabel) bookEditTocKoLabel.textContent = isAlbum ? '트랙리스트 (한글 KO)' : '책 목차 (한글 KO)';
+    if (bookEditTocEnLabel) bookEditTocEnLabel.textContent = isAlbum ? '트랙리스트 (영문 EN)' : '책 목차 (영문 EN)';
     renderBookDetails();
     setBookDetailPage(0);
     if (bookAdminEditButton) bookAdminEditButton.hidden = !isAdmin;
@@ -136,6 +255,9 @@
     bookDetailOverlay.setAttribute('aria-hidden', 'false');
     window.requestAnimationFrame(() => bookDetailOverlay.classList.add('is-open'));
     return true;
+  }
+  function openBookModal(itemId, itemMetadata) {
+    return openBookDetailsModal(itemId, itemMetadata);
   }
   function closeBookDetailsModal() {
     if (!bookDetailOverlay) return;
@@ -229,7 +351,8 @@
       bookDetails.purchaseUrl = '';
       renderBookDetails();
       try {
-        localStorage.setItem(BOOK_DETAILS_STORAGE_KEY, JSON.stringify({ creativeAct: bookDetails }));
+        bookDetailsById[activeBookId] = { ...bookDetails };
+        localStorage.setItem(BOOK_DETAILS_STORAGE_KEY, JSON.stringify(bookDetailsById));
         bookAdminEditor.hidden = true;
         bookDetailsCard.classList.remove('is-editing');
         if (bookEditorStatus) bookEditorStatus.textContent = '미리보기에 적용하고 저장했습니다.';
@@ -239,7 +362,10 @@
       }
     });
     if (bookEditorCopy) bookEditorCopy.addEventListener('click', () => {
-      const exportData = { ...BOOK_DETAILS.creativeAct };
+      const exportBookDetails = Object.fromEntries(
+        Object.entries(bookDetailsById).map(([bookId, details]) => [bookId, { ...details }])
+      );
+      const exportData = { ...bookDetails };
       BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
         if (bookEditorInputs[field]) exportData[field] = bookEditorInputs[field].value;
       });
@@ -248,7 +374,8 @@
         url: inputs.url ? inputs.url.value.trim() : ''
       }));
       exportData.purchaseUrl = '';
-      const sourceCode = `const BOOK_DETAILS = ${JSON.stringify({ creativeAct: exportData }, null, 2)};`;
+      exportBookDetails[activeBookId] = exportData;
+      const sourceCode = `const BOOK_DETAILS = ${JSON.stringify(exportBookDetails, null, 2)};`;
       if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
         if (bookEditorStatus) bookEditorStatus.textContent = '이 브라우저에서는 클립보드 복사를 지원하지 않습니다.';
         return;
@@ -1139,7 +1266,7 @@ let shopZoom = 0.35;
       if (shopHits.length > 0 && archiveShop) {
         const hitItem = shopHits.at(0).object.userData.shopItem;
         if (hitItem) {
-          if (openBookDetailsModal(hitItem.bookId)) return;
+          if (openBookModal(hitItem.itemId || hitItem.bookId, hitItem)) return;
           archiveShop.openItemModal(hitItem);
           return;
         }
