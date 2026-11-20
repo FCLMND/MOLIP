@@ -1,5 +1,8 @@
 (function() {
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'fclmnd';
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const fsBtn = document.getElementById('fs-btn');
+  if (isStandalone && fsBtn) fsBtn.style.setProperty('display', 'none', 'important');
   const introLoader = document.getElementById('molip-loader');
   const introProgressBar = document.getElementById('molip-loader-progress');
   const introProgressTrack = document.getElementById('molip-loader-track');
@@ -1059,7 +1062,6 @@ let shopZoom = 0.35;
     });
   }
 
-  const fsBtn = document.getElementById('fs-btn');
   let fullscreenHintToast = null, fullscreenHintTimer = 0;
   function showFullscreenHint() {
     if (!fullscreenHintToast) {
@@ -1122,7 +1124,6 @@ let shopZoom = 0.35;
     }
     const root = document.documentElement;
     const isIPhone = /iPhone/i.test(navigator.userAgent) || /iPhone/i.test(navigator.platform);
-    const isStandalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
     if (isIPhone && !isStandalone &&
         typeof root.requestFullscreen !== 'function' && typeof root.webkitRequestFullscreen !== 'function') {
       showFullscreenHint();
