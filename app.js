@@ -252,10 +252,27 @@
     window.setTimeout(() => introLoader.remove(), 850);
   }
 
+  let audioHardwarePulsePlayed = false;
   function startRoomAudioFromGesture() {
     initAudio();
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
+    }
+
+    if (audioCtx && !audioHardwarePulsePlayed) {
+      audioHardwarePulsePlayed = true;
+      try {
+        const pulse = audioCtx.createOscillator();
+        const pulseGain = audioCtx.createGain();
+        pulse.frequency.value = 440;
+        pulseGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        pulse.connect(pulseGain);
+        pulseGain.connect(audioCtx.destination);
+        pulse.start();
+        pulse.stop(audioCtx.currentTime + 0.02);
+      } catch (error) {
+        console.warn('Audio hardware could not be activated:', error);
+      }
     }
 
     if (aEl) {
