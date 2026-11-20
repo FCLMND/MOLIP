@@ -362,6 +362,10 @@
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.14;
   document.body.appendChild(renderer.domElement);
+  renderer.domElement.style.position = 'fixed';
+  renderer.domElement.style.inset = '0';
+  renderer.domElement.style.width = '100%';
+  renderer.domElement.style.height = '100%';
   function updateCameraViewport() {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth || document.documentElement.clientWidth || window.innerWidth;
@@ -369,7 +373,7 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
-    camera.fov = isTouchDevice && height > width ? 76 : defaultCameraFov;
+    camera.fov = (width <= 768 || height > width) && camera.aspect < 1 ? 76 : defaultCameraFov;
     camera.updateProjectionMatrix();
   }
   let viewportUpdateTimeout = 0;
