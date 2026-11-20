@@ -2,7 +2,9 @@
   const isAdmin = new URLSearchParams(window.location.search).get('admin') === 'fclmnd';
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   const fsBtn = document.getElementById('fs-btn');
+  const spaceFullscreenBtn = document.getElementById('space-fullscreen-btn');
   if (isStandalone && fsBtn) fsBtn.style.setProperty('display', 'none', 'important');
+  if (isStandalone && spaceFullscreenBtn) spaceFullscreenBtn.style.setProperty('display', 'none', 'important');
   const introLoader = document.getElementById('molip-loader');
   const introProgressBar = document.getElementById('molip-loader-progress');
   const introProgressTrack = document.getElementById('molip-loader-track');
@@ -1110,6 +1112,66 @@ let shopZoom = 0.35;
   function getFullscreenElement() {
     return document.fullscreenElement || document.webkitFullscreenElement || null;
   }
+  let isSpaceFullscreen = false;
+  function updateSpaceFullscreenButton() {
+    if (!spaceFullscreenBtn) return;
+    const icon = spaceFullscreenBtn.querySelector('svg');
+    const isFullscreen = Boolean(getFullscreenElement());
+    if (icon) {
+      icon.innerHTML = isFullscreen
+        ? '<path d="M8 3v5H3M16 3v5h5M3 16h5v5M21 16h-5v5" />'
+        : '<path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" />';
+    }
+    spaceFullscreenBtn.setAttribute('aria-label', isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
+  }
+  function toggleSpaceFullscreen() {
+    if (getFullscreenElement()) {
+      const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+      if (typeof exitFullscreen !== 'function') {
+        console.warn('Fullscreen exit is not supported by this browser.');
+        return;
+      }
+      try {
+        const exitAttempt = exitFullscreen.call(document);
+        if (exitAttempt && typeof exitAttempt.catch === 'function') {
+          exitAttempt.catch(error => {
+            console.warn('Space fullscreen exit failed:', error);
+            updateSpaceFullscreenButton();
+            scheduleCameraViewportUpdate();
+          });
+        }
+      } catch (error) {
+        console.warn('Space fullscreen exit failed:', error);
+        updateSpaceFullscreenButton();
+        scheduleCameraViewportUpdate();
+      }
+      return;
+    }
+
+    const root = document.documentElement;
+    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
+    if (typeof requestFullscreen !== 'function') {
+      console.warn('Fullscreen is not supported by this browser.');
+      return;
+    }
+    isSpaceFullscreen = true;
+    try {
+      const request = requestFullscreen.call(root);
+      if (request && typeof request.catch === 'function') {
+        request.catch(error => {
+          console.warn('Space fullscreen request failed:', error);
+          isSpaceFullscreen = false;
+          updateSpaceFullscreenButton();
+          scheduleCameraViewportUpdate();
+        });
+      }
+    } catch (error) {
+      console.warn('Space fullscreen request failed:', error);
+      isSpaceFullscreen = false;
+      updateSpaceFullscreenButton();
+      scheduleCameraViewportUpdate();
+    }
+  }
   function showFullscreenVideo() {
     document.documentElement.classList.remove('cinema-mode');
     document.body.classList.remove('cinema-mode');
@@ -1203,7 +1265,14 @@ let shopZoom = 0.35;
   const exitFsBtn = document.getElementById('exit-fs-btn');
   if (exitFsBtn) exitFsBtn.addEventListener('click', exitFs);
   function syncFullscreenState() {
-    if (getFullscreenElement()) {
+    const fullscreenElement = getFullscreenElement();
+    if (!fullscreenElement && isSpaceFullscreen) isSpaceFullscreen = false;
+    updateSpaceFullscreenButton();
+    if (fullscreenElement && isSpaceFullscreen) {
+      scheduleCameraViewportUpdate();
+      return;
+    }
+    if (fullscreenElement) {
       isFs = true;
       showFullscreenVideo();
       scheduleCameraViewportUpdate();
@@ -1219,6 +1288,10 @@ let shopZoom = 0.35;
   }
   document.addEventListener('fullscreenchange', syncFullscreenState);
   document.addEventListener('webkitfullscreenchange', syncFullscreenState);
+  if (spaceFullscreenBtn) {
+    spaceFullscreenBtn.addEventListener('click', toggleSpaceFullscreen);
+    updateSpaceFullscreenButton();
+  }
 
   let audioCtx, analyser, muffleFilter, dataArray;
   function initAudio() {
