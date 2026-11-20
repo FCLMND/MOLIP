@@ -11,7 +11,7 @@
       "curationNoteKo": "\n처음 이 책을 읽기 시작했을 때는 솔직히 조금 회의적이었다.\n책의 초반부 약 3분의 1까지는 창작이란 무엇인가, 누구나 창작자가 될 수 있다는 것, 주변을 관찰하고 감각을 열어두라는 식의 다소 추상적이고 원론적인 이야기들이 이어진다. 이미 창작 활동을 해오면서 스스로 체득한 생각들이기도 했고, 어쩌면 너무 당연해서 굳이 책을 통해 다시 확인할 필요가 있을까 싶은 하나마나한 내용들도 있었다.\n\n하지만 중반부를 지나면서 책을 바라보는 시선이 조금씩 달라졌다.\n 창작을 둘러싼 철학적인 선언보다는 실제 작업 과정에서 마주하게 되는 문제들과 그것을 다루는 태도에 관한 이야기들이 등장한다.\n\n 흥미로웠던 것은 그중 상당수가 내가 음악을 만들면서 혼자 시행착오를 거쳐 발견했던 것들과 상당히 맞닿아 있었다는 점이다. 누군가에게 배워서 적용했다기보다는 오랜 시간 작업하면서 자연스럽게 형성된 나름의 원칙들이었는데, 그것을 다른 창작자의 언어로 다시 확인하는 경험은 생각보다 유의미했다. \n\n당신이 어떤형태로든 창작중이라면 추천해주고싶은 도서",
       "excerptEn": "Selected excerpt coming soon.",
       "excerptKo": "Experimentation. Try Everything. Crafting. Momentum. Breaking the Sameness. Completion.",
-      "tocKo": "목차 정보를 준비 중입니다.",
+      "tocKo": "29\nExperimentation\n\n실험을 통한 가능성 탐색\n\n\n30\nTry Everything\n\n판단을 유보하고 다양한 시도하기\n\n\n31\nCrafting\n\n아이디어를 구체적인 결과물로 다듬기\n\n\n32\nMomentum\n\n창작의 흐름 유지하기\n\n\n33\nPoint of View\n\n자신만의 관점 발견하기\n\n\n34\nBreaking the Sameness\n\n반복과 익숙함에서 벗어나기\n\n\n35\nCompletion\n\n작업을 끝까지 완성하기\n\n\n37\nThe Experimenter and the Finisher\n\n탐색과 완성 사이의 균형\n\n\n38\nTemporary Rules\n\n스스로 설정하는 임시적 제약\n\n\n55\n24/7 (Staying in It)\n\n창작의 흐름 안에 머무르기\n\n\n65\nClean Slate\n\n기존의 관성에서 벗어나기\n\n\n69\nPlay\n\n놀이와 유희를 통한 창작",
       "tocEn": "Table of contents coming soon."
     }
   };
