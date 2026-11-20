@@ -1201,7 +1201,20 @@ let shopZoom = 0.35;
     window.scrollTo(0, 1);
   }
   function enterFullscreen() {
-    if (getFullscreenElement() || (isFs && document.body.classList.contains('cinema-mode'))) {
+    const fullscreenElement = getFullscreenElement();
+    const isVisualFullscreen = isFs &&
+      (document.body.classList.contains('native-fullscreen') || document.body.classList.contains('cinema-mode'));
+    if (isVisualFullscreen) {
+      exitFs(!(isSpaceFullscreen && fullscreenElement));
+      return;
+    }
+    if (fullscreenElement && isSpaceFullscreen) {
+      isFs = true;
+      showFullscreenVideo();
+      scheduleCameraViewportUpdate();
+      return;
+    }
+    if (fullscreenElement) {
       exitFs();
       return;
     }
