@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sanctuary Listening Room</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { overflow: hidden; background: #040406; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif; }
+    canvas { display: block; }
+    #molip-loader {
+      position: fixed; inset: 0; z-index: 9999; display: flex;
+      flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+      background: rgba(24, 24, 27, 0.78); backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      opacity: 1; transition: opacity 0.85s ease;
+    }
+    #molip-loader.is-exiting { opacity: 0; pointer-events: none; }
+    #molip-frame {
+      width: min(88vw, 884px); aspect-ratio: 4 / 3; max-height: 68vh;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55); border-radius: 14px;
+      background-image: url('./media/intro_bg.png');
+      background-size: cover; background-position: center; background-repeat: no-repeat;
+    }
+    #molip-loader-content {
+      display: flex; flex-direction: column; justify-content: center; gap: 28px;
+      align-items: center; width: min(88vw, 380px); padding: 16px 24px;
+      border-radius: 20px; background: rgba(18, 18, 20, 0.62);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    #molip-loader-track {
+      width: 100%; height: 2px;
+      overflow: hidden; background: rgba(255, 255, 255, 0.24);
+    }
+    #molip-loader-progress {
+      width: 0%; height: 100%; background: #fff;
+      transition: width 0.25s ease-out;
+    }
+    #molip-loader-status {
+      display: flex; flex-direction: column; gap: 5px;
+      color: #fff; text-align: center; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+    }
+    #molip-loader-status .status-en, #molip-loader-hint .hint-en {
+      font-size: 11px; letter-spacing: 0.18em;
+    }
+    #molip-loader-status .status-ko, #molip-loader-hint .hint-ko {
+      font-size: 12px; letter-spacing: 0.04em;
+    }
+    #molip-loader-hint {
+      display: flex; flex-direction: column; gap: 5px;
+      color: rgba(255, 255, 255, 0.72); text-align: center;
+    }
+    #visitor-country-selector { position: relative; }
+    #visitor-country-badge {
+      display: flex; align-items: center; gap: 7px; padding: 6px 11px;
+      color: rgba(255, 255, 255, 0.86); font: inherit; font-size: 11px;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    #visitor-country-badge:hover { background: rgba(255, 255, 255, 0.14); }
+    #visitor-country-flag { font-size: 15px; line-height: 1; }
+    #visitor-country-popup {
+      position: absolute; z-index: 10001; left: 50%; bottom: calc(100% + 9px);
+      width: min(320px, calc(100vw - 40px)); padding: 10px;
+      transform: translateX(-50%); color: #f3f4f6; text-align: left;
+      background: rgba(20, 20, 24, 0.94); border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 14px; box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    }
+    #visitor-country-popup[hidden] { display: none; }
+    #visitor-country-search {
+      width: 100%; padding: 9px 11px; color: #fff; font: inherit; font-size: 12px;
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 9px; outline: none;
+    }
+    #visitor-country-badge, #visitor-country-list button,
+    #ui-bar button, #ui-bar label.btn {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #visitor-country-search:focus { border-color: rgba(255, 255, 255, 0.38); }
+    #visitor-country-list {
+      max-height: min(36vh, 260px); overflow-y: auto; margin-top: 7px;
+      scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+    }
+    #visitor-country-list button {
+      display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 9px;
+      color: rgba(255, 255, 255, 0.88); text-align: left; font: inherit; font-size: 12px;
+      background: transparent; border: 0; border-radius: 8px;
+    }
+    #visitor-country-list button:hover { background: rgba(255, 255, 255, 0.12); }
+    #visitor-country-list .country-flag { width: 22px; font-size: 16px; }
+    #visitor-country-list .country-code { margin-left: auto; color: rgba(255, 255, 255, 0.48); }
+    #visitor-country-empty { padding: 12px 9px; color: rgba(255, 255, 255, 0.56); font-size: 12px; }
+    #molip-loader-status.is-ready { animation: molip-loader-pulse 1.8s ease-in-out infinite; }
+    @keyframes molip-loader-pulse {
+      0%, 100% { opacity: 0.58; }
+      50% { opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #molip-loader, #molip-loader-progress { transition-duration: 0.01ms; }
+      #molip-loader-status.is-ready { animation: none; }
+    }
+    #ui-bar {
+      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+      background: rgba(12, 13, 18, 0.72); backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; z-index: 20;
+    }
+    button, label.btn {
+      background: rgba(255, 255, 255, 0.07); color: #e5e7eb;
+      border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 999px;
+      padding: 7px 14px; font-size: 12px; cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    button:hover, label.btn:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+    button.active { background: rgba(255, 184, 102, 0.22); border-color: rgba(255, 184, 102, 0.65); color: #ffd599; }
+    #breathing-toast {
+      position: fixed; left: 50%; bottom: 88px; z-index: 40;
+      padding: 10px 16px; color: rgba(255, 255, 255, 0.92);
+      font: 13px -apple-system, BlinkMacSystemFont, sans-serif;
+      white-space: nowrap; background: rgba(18, 18, 22, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 999px;
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      opacity: 0; pointer-events: none; transform: translate(-50%, 8px);
+      transition: opacity 0.28s ease, transform 0.28s ease;
+    }
+    #breathing-toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
+    @media (prefers-reduced-motion: reduce) {
+      #breathing-toast { transition-duration: 0.01ms; }
+    }
+    input[type="file"] { display: none; }
+    #host-panel {
+      display: none; align-items: center; gap: 6px; padding-left: 8px;
+      border-left: 1px solid rgba(255, 255, 255, 0.18);
+    }
+    #dj-initial-input {
+      width: 96px; background: rgba(255, 59, 82, 0.14); color: #ffe4e6;
+      border: 1px solid rgba(255, 85, 105, 0.45); border-radius: 999px;
+      padding: 6px 12px; font-size: 12px; outline: none; text-align: center;
+    }
+    #dj-initial-input::placeholder { color: rgba(255, 228, 230, 0.45); }
+    #admin-panel {
+      display: none; position: fixed; top: 50%; left: 18px; transform: translateY(-50%);
+      width: min(320px, calc(100vw - 36px)); padding: 16px;
+      flex-direction: column; gap: 10px; color: #e5e7eb;
+      background: rgba(12, 13, 18, 0.78); backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 16px; z-index: 20;
+    }
+    #admin-shop-sign-input {
+      display: block; width: 100%; min-height: 84px; padding: 10px 12px;
+      resize: vertical; color: #e5e7eb; background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 10px;
+      font: inherit; font-size: 13px; outline: none;
+    }
+    #admin-shop-sign-input::placeholder { color: rgba(229, 231, 235, 0.48); }
+    #td-fs-wrap {
+      display: none; position: fixed; inset: 0; background: #000; z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    #td-fs-wrap.active { display: flex; }
+    #td-fs-video, #td-fs-canvas { width: 100%; height: 100%; object-fit: cover; }
+    #exit-fs-btn { position: fixed; top: 20px; right: 24px; z-index: 101; }
+  </style>
+</head>
+<body>
+  <div id="molip-loader" aria-live="polite">
+    <div id="molip-frame">
+    </div>
+    <div id="molip-loader-content">
+      <div id="molip-loader-status">
+        <span class="status-en">LOADING SANCTUARY...</span>
+        <span class="status-ko">공간을 불러오는 중입니다...</span>
+      </div>
+      <div id="molip-loader-track" role="progressbar" aria-label="Loading" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="molip-loader-progress"></div>
+      </div>
+      <div id="molip-loader-hint">
+        <span class="hint-en">TURN ON SOUND FOR FULL IMMERSION</span>
+        <span class="hint-ko">온전한 몰입을 위해 사운드를 켜고 감상해 주세요</span>
+      </div>
+      <div id="visitor-country-selector">
+        <button id="visitor-country-badge" type="button" aria-expanded="false" aria-controls="visitor-country-popup">
+          <span id="visitor-country-flag" aria-hidden="true"></span>
+          <span id="visitor-country-code"></span>
+        </button>
+        <div id="visitor-country-popup" hidden>
+          <input id="visitor-country-search" type="search" autocomplete="off" placeholder="Search country" aria-label="Search country" />
+          <div id="visitor-country-list" role="listbox" aria-label="Countries"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside id="admin-panel" aria-label="관리자 패널" style="display: none;">
+    <label for="admin-shop-sign-input">아카이브 숍 안내판 문구</label>
+    <textarea id="admin-shop-sign-input" rows="3" placeholder="유리 안내판에 표시할 문구를 입력하세요..."></textarea>
+  </aside>
+
+  <div id="ui-bar">
+    <span id="status-badge" style="color:#e5e7eb;font-size:12px;padding:6px 12px;background:rgba(20,22,28,0.75);border:1px solid rgba(255,255,255,0.14);border-radius:20px;margin-right:4px;">16 / 20 Seats</span>
+    <label class="btn" for="v-up" style="display: none;">Upload Visual</label>
+    <input type="file" id="v-up" accept="video/*" style="display: none;" />
+    <label class="btn" for="a-up" style="display: none;">Upload Audio</label>
+    <input type="file" id="a-up" accept="audio/*" style="display: none;" />
+    <button id="pp-btn">Play / Pause</button>
+    <button id="breathe-btn">Breathe</button>
+    <button id="view-btn">Overview</button>
+    <button id="sim-btn" style="display: none;">Full Room Test</button>
+    <button id="fs-btn">Fullscreen</button>
+
+    <div id="host-panel" style="display: none;">
+      <input type="text" id="dj-initial-input" maxlength="8" placeholder="FCLMND" value="FCLMND" readonly />
+      <button id="dj-view-btn" style="display: none;">DJ View</button>
+    </div>
+  </div>
+
+  <div id="breathing-toast" role="status" aria-live="polite" aria-hidden="true">Breathing meditation — Coming soon</div>
+
+  <div id="td-fs-wrap">
+    <button id="exit-fs-btn">Exit Fullscreen</button>
+    <video id="td-fs-video" loop muted preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
+    <canvas id="td-fs-canvas" width="1024" height="576"></canvas>
+  </div>
+
+  <video id="td-v" loop muted preload="auto" playsinline webkit-playsinline crossorigin="anonymous" style="display:none;"></video>
+  <video id="shop-v" src="media/shop_visual.mp4" loop muted playsinline preload="metadata" style="display:none;" onerror="console.error('Shop video load failed:', this.src)"></video>
+  <audio id="rm-a" loop style="display:none;"></audio>
+
+  <script src="three.min.js"></script>
+  <script src="textures.js"></script>
+  <script src="speakers.js"></script>
+  <script src="djbooth.js"></script>
+  <script src="dj_avatar.js"></script>
+  <script src="avatar.js"></script>
+  <script src="room.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
