@@ -244,6 +244,7 @@
         <span class="hint-en">TURN ON SOUND FOR FULL IMMERSION</span>
         <span class="hint-ko">온전한 몰입을 위해 사운드를 켜고 감상해 주세요</span>
       </div>
+      <button id="molip-enter" type="button" hidden>Enter</button>
       <div id="visitor-country-selector">
         <button id="visitor-country-badge" type="button" aria-expanded="false" aria-controls="visitor-country-popup">
           <span id="visitor-country-flag" aria-hidden="true"></span>
@@ -301,7 +302,7 @@
   <button id="exit-fs-btn" type="button" aria-label="Exit Fullscreen">Exit Fullscreen</button>
 
   <video id="td-v" loop muted preload="auto" playsinline webkit-playsinline crossorigin="anonymous" style="display:none;"></video>
-  <video id="shop-v" src="media/shop_visual.mp4" loop muted playsinline webkit-playsinline preload="auto" style="display:none;" onerror="console.error('Shop video load failed:', this.src)"></video>
+  <video id="shop-v" src="media/shop_visual.mp4" loop muted playsinline webkit-playsinline preload="auto" crossorigin="anonymous" style="display:none;" onerror="console.error('Shop video load failed:', this.src)"></video>
   <audio id="rm-a" loop playsinline preload="auto" style="display:none;"></audio>
 
   <script src="three.min.js"></script>

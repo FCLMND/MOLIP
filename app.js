@@ -4,6 +4,28 @@
   const introProgressBar = document.getElementById('molip-loader-progress');
   const introProgressTrack = document.getElementById('molip-loader-track');
   const introStatus = document.getElementById('molip-loader-status');
+  const introEnter = document.getElementById('molip-enter');
+  const aEl = document.getElementById('rm-a');
+  const DEFAULT_SOUND_URL = './media/Sound.mp3';
+  let introAudioReady = false, introSceneReady = false;
+  aEl.preload = 'auto';
+  aEl.src = DEFAULT_SOUND_URL;
+  const introAudioTimeout = window.setTimeout(() => {
+    console.warn('Room audio preload timed out; entry will continue.');
+    finishRoomAudioLoading();
+  }, 4500);
+  function finishRoomAudioLoading() {
+    if (introAudioReady) return;
+    introAudioReady = true;
+    window.clearTimeout(introAudioTimeout);
+    aEl.removeEventListener('canplay', finishRoomAudioLoading);
+    aEl.removeEventListener('canplaythrough', finishRoomAudioLoading);
+    if (introSceneReady) finishIntroLoading();
+  }
+  aEl.addEventListener('canplay', finishRoomAudioLoading);
+  aEl.addEventListener('canplaythrough', finishRoomAudioLoading);
+  aEl.load();
+  if (aEl.readyState >= 3) finishRoomAudioLoading();
   const visitorCountryCodes = 'AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ');
   const visitorCountryCodeSet = new Set(visitorCountryCodes);
   const englishRegionNames = typeof Intl.DisplayNames === 'function'
@@ -239,13 +261,9 @@
     if (introProgressTrack) introProgressTrack.setAttribute('aria-valuenow', String(progress));
   }
 
-  function dismissIntro(startMedia) {
+  function dismissIntro() {
     if (!introLoader || !introReady || introDismissed) return;
     introDismissed = true;
-    if (startMedia) {
-      if (vEl && vEl.src) playMedia(vEl);
-      startMainAudioWithFade(850);
-    }
     fadeOutIntroAudio(850);
     introLoader.classList.add('is-exiting');
     window.setTimeout(() => introLoader.remove(), 850);
@@ -271,7 +289,6 @@
     if (aEl) {
       aEl.muted = false;
       aEl.volume = 1.0;
-      if (aEl.src && aEl.readyState === HTMLMediaElement.HAVE_NOTHING) aEl.load();
       try {
         const playAttempt = aEl.play();
         if (playAttempt && typeof playAttempt.catch === 'function') {
@@ -298,24 +315,8 @@
     }
   }
 
-  function startRoomMediaFromGesture() {
-    startRoomAudioFromGesture(true);
-    startShopVideoFromGesture();
-    if (vEl) {
-      vEl.muted = true;
-      try {
-        const playAttempt = vEl.play();
-        if (playAttempt && typeof playAttempt.catch === 'function') {
-          playAttempt.catch(error => console.warn('Room visual playback could not start:', error));
-        }
-      } catch (error) {
-        console.warn('Room visual playback could not start:', error);
-      }
-    }
-  }
-
   function finishIntroLoading() {
-    if (!introLoader || introLoadComplete) return;
+    if (!introLoader || introLoadComplete || !introAudioReady || !introSceneReady) return;
     introLoadComplete = true;
     setIntroProgress(100);
     updateIntroEntryAvailability();
@@ -324,23 +325,20 @@
   if (introLoader) {
     setIntroProgress(0);
     introLoader.addEventListener('mousemove', tryPlayIntroAudio, { passive: true });
-    const handleIntroEntry = event => {
-      if (introDismissed) return;
-      if (event.target instanceof Element && event.target.closest('#visitor-country-selector')) {
-        tryPlayIntroAudio();
-        return;
+    introLoader.addEventListener('pointerdown', event => {
+      if (event.target !== introEnter) tryPlayIntroAudio();
+    }, { passive: true });
+    introEnter.addEventListener('click', () => {
+      initAudio();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
       }
-      if (!introReady) {
-        tryPlayIntroAudio();
-        event.stopPropagation();
-        return;
-      }
-      startRoomMediaFromGesture();
-      dismissIntro(false);
-    };
-    introLoader.addEventListener('pointerdown', handleIntroEntry, true);
-    introLoader.addEventListener('touchend', handleIntroEntry, { capture: true, passive: true });
-    introLoader.addEventListener('click', handleIntroEntry, true);
+      aEl.muted = false;
+      aEl.volume = 1.0;
+      aEl.play().catch(error => console.warn('Room audio playback could not start:', error));
+      syncRoomMedia(isArchiveShopAudioActive());
+      dismissIntro();
+    });
   }
 
   setIntroProgress(8);
@@ -546,12 +544,13 @@ let shopZoom = 0.35;
     if (introStatus) {
       introStatus.querySelector('.status-en').textContent = isFull
         ? 'SANCTUARY IS AT FULL CAPACITY'
-        : 'CLICK TO ENTER';
+        : 'READY TO ENTER';
       introStatus.querySelector('.status-ko').textContent = isFull
         ? '현재 접속자가 많아 입장이 대기 중입니다'
         : '클릭하여 공간에 입장하기';
       introStatus.classList.toggle('is-ready', !isFull);
     }
+    if (introEnter) introEnter.hidden = isFull;
   }
 
   if (isAdmin && hostPanel) {
@@ -684,7 +683,7 @@ let shopZoom = 0.35;
     camMode = 'shop';
     seatYaw = 0;
     seatPitch = 0.02;
-    startShopVideoFromGesture();
+    syncRoomMedia(true);
     startShopAudioFromUserGesture();
     updateStatusUI();
   }
@@ -701,6 +700,7 @@ let shopZoom = 0.35;
       playerAvatar.root.position.set(-7.6, 0, 18.8);
       playerAvatar.walkTo(-6.8, 18.8, null);
       camMode = 'overview';
+      syncRoomMedia(false);
       updateStatusUI();
     } else {
       enterArchiveShopDirect();
@@ -945,7 +945,7 @@ let shopZoom = 0.35;
   }
 
   const fsWrap = document.getElementById('td-fs-wrap'), fsVideo = document.getElementById('td-fs-video'), fsCanvas = document.getElementById('td-fs-canvas'), fsCtx = fsCanvas ? fsCanvas.getContext('2d') : null;
-  const vEl = document.getElementById('td-v'), aEl = document.getElementById('rm-a');
+  const vEl = document.getElementById('td-v');
   const shopVisual = document.getElementById('shop-v');
   if (fsVideo) {
     fsVideo.muted = true;
@@ -955,21 +955,24 @@ let shopZoom = 0.35;
     fsVideo.setAttribute('playsinline', '');
     fsVideo.setAttribute('webkit-playsinline', '');
   }
-  if (shopVisual) {
-    shopVisual.muted = true;
-    shopVisual.loop = true;
-    shopVisual.playsInline = true;
-    shopVisual.preload = 'auto';
-    shopVisual.setAttribute('playsinline', '');
-    shopVisual.setAttribute('webkit-playsinline', '');
-  }
-  let shopVisualActive = false;
-  function startShopVideoFromGesture() {
-    if (!archiveShop || !archiveShop.shopVideoEl) return;
-    archiveShop.shopVideoEl.muted = true;
-    const playAttempt = archiveShop.shopVideoEl.play();
-    if (playAttempt && typeof playAttempt.catch === 'function') {
-      playAttempt.catch(error => console.warn('Archive shop video playback could not start:', error));
+  function syncRoomMedia(isShop) {
+    const shopVideo = archiveShop && shopVisual;
+    if (isShop) {
+      if (vEl) vEl.pause();
+      if (shopVideo) {
+        shopVideo.muted = true;
+        shopVideo.playsInline = true;
+        shopVideo.play().catch(error => {
+          if (error.name !== 'AbortError') console.warn('Archive shop video playback could not start:', error);
+        });
+      }
+    } else {
+      if (shopVideo) shopVideo.pause();
+      if (vEl) {
+        vEl.play().catch(error => {
+          if (error.name !== 'AbortError') console.warn('Room visual playback could not start:', error);
+        });
+      }
     }
   }
   const shopAudio = typeof window.Audio === 'function' ? new window.Audio() : null;
@@ -995,7 +998,6 @@ let shopZoom = 0.35;
   }
 
   const DEFAULT_VISUAL_URL = 'media/visual.mp4';
-  const DEFAULT_SOUND_URL = './media/Sound.mp3';
   const pendingVideoPlayback = new WeakSet();
 
   function playMedia(media) {
@@ -1020,12 +1022,6 @@ let shopZoom = 0.35;
     return playResult;
   }
 
-  function pauseMedia(media) {
-    if (!media || typeof media.pause !== 'function') return;
-    if (media instanceof HTMLVideoElement) pendingVideoPlayback.delete(media);
-    media.pause();
-  }
-
   function createVideoTexture(video) {
     const texture = new THREE.VideoTexture(video);
     texture.minFilter = THREE.LinearFilter;
@@ -1047,16 +1043,10 @@ let shopZoom = 0.35;
     vEl.src = DEFAULT_VISUAL_URL;
     wall.material.map = createVideoTexture(vEl);
     wall.material.needsUpdate = true;
-    playMedia(vEl);
-    vEl.addEventListener('pause', () => {
-      if (!isArchiveShopAudioActive()) playMedia(vEl);
-    });
   }
 
   if (aEl) {
-    aEl.preload = 'auto';
     aEl.setAttribute('playsinline', '');
-    aEl.src = DEFAULT_SOUND_URL;
     window.addEventListener('pointerdown', function startDefaultAudio() {
       if (!introDismissed) return;
       if (isArchiveShopAudioActive()) return;
@@ -1228,26 +1218,6 @@ let shopZoom = 0.35;
       dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
   }
-  function startMainAudioWithFade(duration) {
-    if (!aEl || !aEl.src || isArchiveShopAudioActive()) return;
-    if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
-    mainAudioFadeFrame = 0;
-    const shouldCrossfade = Boolean(introAudio && !introAudio.paused && aEl.paused);
-    const targetVolume = 1.0;
-    initAudio();
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
-    }
-    aEl.muted = false;
-    if (!aEl.paused) {
-      aEl.volume = targetVolume;
-      return;
-    }
-    if (shouldCrossfade) aEl.volume = 0;
-    else aEl.volume = targetVolume;
-    playMedia(aEl);
-    if (shouldCrossfade) mainAudioFadeFrame = fadeMediaVolume(aEl, targetVolume, duration, () => { mainAudioFadeFrame = 0; });
-  }
   let mainAudioFadeFrame = 0, shopAudioFadeFrame = 0, shopAudioPlayPending = false;
   function fadeMediaVolume(media, targetVolume, duration, onComplete) {
     const startVolume = media.volume;
@@ -1332,8 +1302,7 @@ let shopZoom = 0.35;
       vEl.src = URL.createObjectURL(file);
       wall.material.map = createVideoTexture(vEl);
       wall.material.needsUpdate = true;
-      if (isArchiveShopAudioActive()) pauseMedia(vEl);
-      else playMedia(vEl);
+      syncRoomMedia(isArchiveShopAudioActive());
     });
   }
   const audioUpload = document.getElementById('a-up');
@@ -1346,7 +1315,7 @@ let shopZoom = 0.35;
       initAudio();
       if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
       playMedia(aEl);
-      if (vEl && vEl.src) playMedia(vEl);
+      syncRoomMedia(false);
     });
   }
   const playbackBtn = document.getElementById('pp-btn');
@@ -1356,7 +1325,7 @@ let shopZoom = 0.35;
       if (aEl.paused) {
         if (isArchiveShopAudioActive()) return;
         startRoomAudioFromGesture();
-        if (vEl && vEl.src) playMedia(vEl);
+        syncRoomMedia(false);
       } else {
         if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
         mainAudioFadeFrame = 0;
@@ -1611,17 +1580,11 @@ let shopZoom = 0.35;
     }
 
     const inShopNow = isArchiveShopAudioActive();
-    const shouldPlayShopVisual = camMode === 'shop' || (inShopNow && camera.position.x <= -8.5);
-    if (shopVisual && shouldPlayShopVisual !== shopVisualActive) {
-      shopVisualActive = shouldPlayShopVisual;
-      if (shopVisualActive) shopVisual.play().catch(e => console.warn('Shop video play error:', e));
-      else shopVisual.pause();
-    }
     if (inShopNow) {
       if (!wasInShop) {
+        syncRoomMedia(true);
         resumeMainAudioAfterShop = Boolean(aEl && !aEl.paused);
         fadeOutMainAudio(850);
-        if (vEl) pauseMedia(vEl);
         if (introAudio) fadeOutIntroAudio(850);
         if (shopAudio && shopAudio.paused && !shopAudioPlayPending) startShopAudioFromUserGesture();
       }
@@ -1629,7 +1592,7 @@ let shopZoom = 0.35;
       if (wasInShop && shopAudio) {
         fadeShopAudioTo(0, 850, true);
       }
-      if (wasInShop && vEl) playMedia(vEl);
+      if (wasInShop) syncRoomMedia(false);
       if (wasInShop && resumeMainAudioAfterShop && aEl) {
         fadeInMainAudioAfterShop(850);
       }
@@ -1641,8 +1604,7 @@ let shopZoom = 0.35;
         wall.material.map && wall.material.map.isVideoTexture) {
       wall.material.map.needsUpdate = true;
     }
-    if (inShopNow && archiveShop && archiveShop.shopVideoEl &&
-        archiveShop.shopVideoEl.readyState >= 2 && archiveShop.shopArtMat.map &&
+    if (inShopNow && archiveShop && archiveShop.shopArtMat.map &&
         archiveShop.shopArtMat.map.isVideoTexture) {
       archiveShop.shopArtMat.map.needsUpdate = true;
     }
@@ -1750,8 +1712,9 @@ let shopZoom = 0.35;
         setIntroProgress(80 + introRenderedFrames * 4);
       } else {
         introIsCompleting = true;
-        setIntroProgress(100);
-        window.setTimeout(finishIntroLoading, 260);
+        introSceneReady = true;
+        setIntroProgress(98);
+        finishIntroLoading();
       }
     }
   }

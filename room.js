@@ -1148,7 +1148,7 @@ window.ArchiveShop = {
       return texture;
     }
 
-    const shopVideoEl = document.createElement('video');
+    const shopVideoEl = document.getElementById('shop-v');
     shopVideoEl.loop = true;
     shopVideoEl.muted = true;
     shopVideoEl.playsInline = true;
@@ -1159,14 +1159,8 @@ window.ArchiveShop = {
     shopVideoEl.setAttribute('playsinline', '');
     shopVideoEl.setAttribute('webkit-playsinline', '');
     shopVideoEl.setAttribute('preload', 'auto');
-    shopVideoEl.src = 'media/shop_visual.mp4';
-    shopVideoEl.addEventListener('canplay', () => {
-      shopArtMat.map = createShopVideoTexture(shopVideoEl);
-      shopArtMat.needsUpdate = true;
-      shopVideoEl.play().catch(error => {
-        if (error.name !== 'NotAllowedError') console.warn('Archive shop video playback could not start:', error);
-      });
-    }, { once: true });
+    shopArtMat.map = createShopVideoTexture(shopVideoEl);
+    shopArtMat.needsUpdate = true;
     shopVideoEl.addEventListener('error', () => {
       console.error('Archive shop video load failed:', shopVideoEl.src);
     });
