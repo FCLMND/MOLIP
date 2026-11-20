@@ -130,6 +130,20 @@
     @media (prefers-reduced-motion: reduce) {
       #breathing-toast { transition-duration: 0.01ms; }
     }
+    #orientation-hint {
+      display: none; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 12px);
+      left: 50%; transform: translateX(-50%); align-items: center; gap: 8px;
+      padding: 8px 12px; color: rgba(255, 255, 255, 0.76);
+      font: 11px -apple-system, BlinkMacSystemFont, sans-serif; letter-spacing: 0.02em;
+      white-space: nowrap; background: rgba(12, 13, 18, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      pointer-events: none; z-index: 19;
+    }
+    #orientation-hint .rotate-icon { font-size: 15px; opacity: 0.8; }
+    @media (orientation: portrait) and (pointer: coarse) {
+      #orientation-hint { display: flex; }
+    }
     input[type="file"] { display: none; }
     #host-panel {
       display: none; align-items: center; gap: 6px; padding-left: 8px;
@@ -218,6 +232,10 @@
   </div>
 
   <div id="breathing-toast" role="status" aria-live="polite" aria-hidden="true">Breathing meditation — Coming soon</div>
+  <div id="orientation-hint" role="note">
+    <span class="rotate-icon" aria-hidden="true">↻</span>
+    <span>Best experienced in landscape mode</span>
+  </div>
 
   <div id="td-fs-wrap">
     <button id="exit-fs-btn">Exit Fullscreen</button>

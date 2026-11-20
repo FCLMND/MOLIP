@@ -252,6 +252,39 @@
     window.setTimeout(() => introLoader.remove(), 850);
   }
 
+  function startRoomMediaFromGesture() {
+    initAudio();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
+    }
+
+    if (aEl) {
+      aEl.muted = false;
+      aEl.volume = 1.0;
+      if (aEl.src && aEl.readyState === HTMLMediaElement.HAVE_NOTHING) aEl.load();
+      try {
+        const playAttempt = aEl.play();
+        if (playAttempt && typeof playAttempt.catch === 'function') {
+          playAttempt.catch(error => console.warn('Room audio playback could not start:', error));
+        }
+      } catch (error) {
+        console.warn('Room audio playback could not start:', error);
+      }
+    }
+
+    if (vEl) {
+      vEl.muted = true;
+      try {
+        const playAttempt = vEl.play();
+        if (playAttempt && typeof playAttempt.catch === 'function') {
+          playAttempt.catch(error => console.warn('Room visual playback could not start:', error));
+        }
+      } catch (error) {
+        console.warn('Room visual playback could not start:', error);
+      }
+    }
+  }
+
   function finishIntroLoading() {
     if (!introLoader || introLoadComplete) return;
     introLoadComplete = true;
@@ -262,15 +295,28 @@
   if (introLoader) {
     setIntroProgress(0);
     introLoader.addEventListener('mousemove', tryPlayIntroAudio, { passive: true });
-    introLoader.addEventListener('pointerdown', event => {
-      tryPlayIntroAudio();
-      if (event.target instanceof Element && event.target.closest('#visitor-country-selector')) return;
+    const handleIntroEntry = event => {
+      if (introDismissed) return;
+      if (event.target instanceof Element && event.target.closest('#visitor-country-selector')) {
+        tryPlayIntroAudio();
+        return;
+      }
       if (!introReady) {
+        tryPlayIntroAudio();
         event.stopPropagation();
         return;
       }
-      dismissIntro(true);
-    }, true);
+      if (isTouchDevice || event.pointerType === 'touch') {
+        startRoomMediaFromGesture();
+        dismissIntro(false);
+      } else {
+        tryPlayIntroAudio();
+        dismissIntro(true);
+      }
+    };
+    introLoader.addEventListener('pointerdown', handleIntroEntry, true);
+    introLoader.addEventListener('touchend', handleIntroEntry, { capture: true, passive: true });
+    introLoader.addEventListener('click', handleIntroEntry, true);
   }
 
   setIntroProgress(8);
@@ -283,6 +329,8 @@
   scene.fog = new THREE.FogExp2(0x040406, 0.019);
 
   const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 140);
+  const defaultCameraFov = camera.fov;
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
   const renderer = new THREE.WebGLRenderer({
     antialias: true,
     powerPreference: "high-performance",
@@ -295,6 +343,13 @@
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.14;
   document.body.appendChild(renderer.domElement);
+  function updateCameraViewport() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.fov = isTouchDevice && window.innerHeight > window.innerWidth ? 76 : defaultCameraFov;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+  updateCameraViewport();
   setIntroProgress(18);
 
   // WebGL 컨텍스트 손실 시 자동 복구 핸들러
@@ -760,10 +815,21 @@ let shopZoom = 0.35;
   const fsWrap = document.getElementById('td-fs-wrap'), fsVideo = document.getElementById('td-fs-video'), fsCanvas = document.getElementById('td-fs-canvas'), fsCtx = fsCanvas ? fsCanvas.getContext('2d') : null;
   const vEl = document.getElementById('td-v'), aEl = document.getElementById('rm-a');
   const shopVisual = document.getElementById('shop-v');
+  if (fsVideo) {
+    fsVideo.muted = true;
+    fsVideo.loop = true;
+    fsVideo.playsInline = true;
+    fsVideo.preload = 'auto';
+    fsVideo.setAttribute('playsinline', '');
+    fsVideo.setAttribute('webkit-playsinline', '');
+  }
   if (shopVisual) {
     shopVisual.muted = true;
     shopVisual.loop = true;
     shopVisual.playsInline = true;
+    shopVisual.preload = 'auto';
+    shopVisual.setAttribute('playsinline', '');
+    shopVisual.setAttribute('webkit-playsinline', '');
   }
   let shopVisualActive = false;
   const shopAudio = typeof window.Audio === 'function' ? new window.Audio() : null;
