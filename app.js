@@ -679,7 +679,7 @@ let shopZoom = 0.35;
   shopNavBtn.innerHTML = '<svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10 12 3.5l8.5 6.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" /><path d="M9 20.5v-7h6v7" /></svg><span class="button-label"></span><span class="mobile-sub"></span>';
   setControlLabel(shopNavBtn, isPlayerInShop() ? '← Listening Room' : 'Archive Shop');
   setControlSubLabel(shopNavBtn, isPlayerInShop() ? '리스닝룸 복귀' : '큐레이션 관람');
-  shopNavBtn.style.cssText = 'padding:8px 15px;border-radius:999px;border:1px solid rgba(217,119,54,0.65);background:rgba(18,16,14,0.82);backdrop-filter:blur(10px);color:#fde68a;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;z-index:30;transition:all 0.2s;';
+  shopNavBtn.style.cssText = 'padding:8px 15px;border-radius:999px;border:1px solid rgba(255,255,255,0.25);background:rgba(255,255,255,0.14);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:#fde68a;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;z-index:30;transition:all 0.2s;';
   document.getElementById('ui-bar').appendChild(shopNavBtn);
 
   function enterArchiveShopDirect() {

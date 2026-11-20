@@ -109,10 +109,12 @@
       #molip-loader-status.is-ready { animation: none; }
     }
     #ui-bar {
-      position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 8px; padding: 10px 16px;
-      background: rgba(12, 13, 18, 0.72); backdrop-filter: blur(14px);
-      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; z-index: 20;
+      position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: center;
+      gap: 8px; padding: 10px 16px;
+      background: rgba(255, 255, 255, 0.14) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.25) !important; border-radius: 999px; z-index: 20;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
       pointer-events: none;
     }
     #ui-bar:not(.is-entered) { display: none !important; }
@@ -120,6 +122,21 @@
       #ui-bar { z-index: 9999; pointer-events: auto !important; }
     }
     #ui-bar button, #ui-bar label.btn, #ui-bar input, #host-panel { pointer-events: auto; }
+    #ui-bar button, #ui-bar label.btn {
+      display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+      line-height: 1.25;
+    }
+    #ui-bar button {
+      background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+    #ui-bar button.active {
+      background: rgba(255, 184, 102, 0.22); border-color: rgba(255, 184, 102, 0.65); color: #ffd599;
+    }
+    #ui-bar .mobile-sub {
+      display: block; font-size: 9.5px; opacity: 0.72; margin-top: 1px;
+      font-weight: 400; letter-spacing: -0.02em;
+    }
     button, label.btn {
       background: rgba(255, 255, 255, 0.07); color: #e5e7eb;
       border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 999px;
@@ -184,14 +201,14 @@
     body.native-fullscreen #exit-fs-btn { display: none; }
     #ui-bar .control-icon { display: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
     #ui-bar .button-label { display: inline; }
-    #ui-bar .mobile-sub { display: none; }
     #ui-bar .mobile-row-break { display: none; }
     @media (max-width: 768px) {
       #ui-bar {
-        position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom));
-        display: flex !important; flex-wrap: wrap !important; align-items: center; justify-content: center !important;
-        gap: 8px !important; width: fit-content !important; max-width: calc(100vw - 24px) !important;
-        padding: 10px 14px !important; border-radius: 22px !important;
+        left: 50%; bottom: calc(12px + env(safe-area-inset-bottom));
+        display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important;
+        align-items: center; justify-content: center !important;
+        gap: 4px !important; width: calc(100vw - 20px) !important; max-width: 420px !important;
+        padding: 6px 8px !important; border-radius: 999px !important;
         z-index: 100; pointer-events: auto !important;
       }
       #ui-bar > #status-badge,
@@ -201,17 +218,16 @@
       #ui-bar > #sim-btn,
       #ui-bar > #host-panel { display: none !important; }
       #ui-bar button, #ui-bar label.btn {
-        position: relative; z-index: 9999 !important; flex: 0 0 auto;
+        position: relative; z-index: 9999 !important; flex: 1;
         display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
-        width: auto; min-width: 0; height: auto; padding: 6px 10px !important;
-        font-size: 11px !important; line-height: 1.25;
+        width: auto; height: auto; padding: 5px 4px !important;
+        font-size: 10px !important; line-height: 1.25; white-space: nowrap;
         pointer-events: auto !important;
       }
       #ui-bar .mobile-sub {
-        display: block; font-size: 9.5px; opacity: 0.65; margin-top: 2px;
-        font-weight: 400; letter-spacing: -0.02em;
+        font-size: 8.5px; opacity: 0.72; margin-top: 1px;
       }
-      #ui-bar .mobile-row-break { display: block; flex-basis: 100%; height: 0; }
+      #ui-bar .mobile-row-break { display: none !important; }
       body.native-fullscreen #ui-bar { z-index: 9999; }
     }
     html.cinema-mode { width: 100%; height: calc(100dvh + 1px); overflow-y: auto; }
