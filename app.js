@@ -13,7 +13,12 @@
       "excerptKo": "Experimentation. Try Everything. Crafting. Momentum. Breaking the Sameness. Completion.",
       "tocKo": "29\nExperimentation\n\n실험을 통한 가능성 탐색\n\n\n30\nTry Everything\n\n판단을 유보하고 다양한 시도하기\n\n\n31\nCrafting\n\n아이디어를 구체적인 결과물로 다듬기\n\n\n32\nMomentum\n\n창작의 흐름 유지하기\n\n\n33\nPoint of View\n\n자신만의 관점 발견하기\n\n\n34\nBreaking the Sameness\n\n반복과 익숙함에서 벗어나기\n\n\n35\nCompletion\n\n작업을 끝까지 완성하기\n\n\n37\nThe Experimenter and the Finisher\n\n탐색과 완성 사이의 균형\n\n\n38\nTemporary Rules\n\n스스로 설정하는 임시적 제약\n\n\n55\n24/7 (Staying in It)\n\n창작의 흐름 안에 머무르기\n\n\n65\nClean Slate\n\n기존의 관성에서 벗어나기\n\n\n69\nPlay\n\n놀이와 유희를 통한 창작",
       "tocEn": "Table of contents coming soon.",
-      "purchaseUrl": ""
+      "purchaseUrl": "",
+      "purchaseLinks": [
+        { "label": "알라딘 · Aladin", "url": "" },
+        { "label": "교보문고 · Kyobo", "url": "" },
+        { "label": "예스24 · YES24", "url": "" }
+      ]
     }
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
@@ -31,6 +36,9 @@
         BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
           if (typeof savedCreativeAct[field] === 'string') bookDetails[field] = savedCreativeAct[field];
         });
+        if (Array.isArray(savedCreativeAct.purchaseLinks)) {
+          bookDetails.purchaseLinks = savedCreativeAct.purchaseLinks.slice(0, 3);
+        }
       }
     }
   } catch (error) {
@@ -60,6 +68,23 @@
     tocKo: document.getElementById('book-toc-ko'),
     tocEn: document.getElementById('book-toc-en')
   };
+  function getConfiguredPurchaseLinks() {
+    const defaultLinks = BOOK_DETAILS.creativeAct.purchaseLinks;
+    const savedLinks = Array.isArray(bookDetails.purchaseLinks) ? bookDetails.purchaseLinks : [];
+    return defaultLinks.map((defaultLink, index) => {
+      const savedLink = savedLinks[index];
+      return {
+        label: savedLink && typeof savedLink.label === 'string' ? savedLink.label : defaultLink.label,
+        url: savedLink && typeof savedLink.url === 'string' ? savedLink.url.trim() : ''
+      };
+    });
+  }
+  function getBookPurchaseLinks() {
+    const purchaseLinks = getConfiguredPurchaseLinks().filter(link => link.url);
+    if (purchaseLinks.length) return purchaseLinks;
+    const legacyUrl = typeof bookDetails.purchaseUrl === 'string' ? bookDetails.purchaseUrl.trim() : '';
+    return legacyUrl ? [{ label: '도서 구매하기 · View Store', url: legacyUrl }] : [];
+  }
   function renderBookDetails() {
     Object.entries(bookDetailTextElements).forEach(([field, element]) => {
       if (element) element.textContent = bookDetails[field] || '';
@@ -69,18 +94,24 @@
       cover.src = bookDetails.cover;
       cover.alt = `${bookDetails.titleEn} book cover`;
     }
-    const purchaseLink = document.getElementById('book-purchase-link');
-    const purchaseUrl = typeof bookDetails.purchaseUrl === 'string' ? bookDetails.purchaseUrl.trim() : '';
+    const purchaseLinksContainer = document.getElementById('book-purchase-links');
     const purchaseActionFooter = document.getElementById('book-action-footer');
     const affiliateNotice = document.getElementById('book-affiliate-notice');
-    const normalizedPurchaseUrl = purchaseUrl.toLowerCase();
-    if (purchaseLink) {
-      if (purchaseUrl) purchaseLink.href = purchaseUrl;
-      else purchaseLink.removeAttribute('href');
+    const purchaseLinks = getBookPurchaseLinks();
+    if (purchaseLinksContainer) {
+      purchaseLinksContainer.replaceChildren(...purchaseLinks.map(({ label, url }) => {
+        const link = document.createElement('a');
+        link.className = 'book-purchase-btn';
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = `${label.trim() || '도서 구매하기'} ↗`;
+        return link;
+      }));
     }
-    if (purchaseActionFooter) purchaseActionFooter.hidden = !purchaseUrl;
+    if (purchaseActionFooter) purchaseActionFooter.hidden = purchaseLinks.length === 0;
     if (affiliateNotice) {
-      affiliateNotice.hidden = !normalizedPurchaseUrl.includes('aladin.co.kr') && !normalizedPurchaseUrl.includes('ttb');
+      affiliateNotice.hidden = !purchaseLinks.some(link => /aladin\.co\.kr|ttb/i.test(link.url));
     }
   }
   function setBookDetailPage(pageIndex) {
@@ -155,9 +186,12 @@
       excerptEn: document.getElementById('book-edit-excerpt-en'),
       excerptKo: document.getElementById('book-edit-excerpt-ko'),
       tocKo: document.getElementById('book-edit-toc-ko'),
-      tocEn: document.getElementById('book-edit-toc-en'),
-      purchaseUrl: document.getElementById('book-edit-purchase-url')
+      tocEn: document.getElementById('book-edit-toc-en')
     };
+    const bookEditorPurchaseInputs = [1, 2, 3].map(index => ({
+      label: document.getElementById(`book-edit-purchase-label-${index}`),
+      url: document.getElementById(`book-edit-purchase-url-${index}`)
+    }));
     const bookEditorStatus = document.getElementById('book-editor-status');
     const bookEditorClose = document.getElementById('book-editor-close');
     const bookEditorPreview = document.getElementById('book-editor-preview');
@@ -165,6 +199,16 @@
     bookAdminEditButton.addEventListener('click', () => {
       BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
         if (bookEditorInputs[field]) bookEditorInputs[field].value = bookDetails[field];
+      });
+      const editorPurchaseLinks = getConfiguredPurchaseLinks();
+      const legacyUrl = typeof bookDetails.purchaseUrl === 'string' ? bookDetails.purchaseUrl.trim() : '';
+      if (!editorPurchaseLinks.some(link => link.url) && legacyUrl) {
+        editorPurchaseLinks[0].label = '도서 구매하기 · View Store';
+        editorPurchaseLinks[0].url = legacyUrl;
+      }
+      bookEditorPurchaseInputs.forEach((inputs, index) => {
+        if (inputs.label) inputs.label.value = editorPurchaseLinks[index].label;
+        if (inputs.url) inputs.url.value = editorPurchaseLinks[index].url;
       });
       if (bookEditorStatus) bookEditorStatus.textContent = '';
       bookAdminEditor.hidden = false;
@@ -178,6 +222,11 @@
       BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
         if (bookEditorInputs[field]) bookDetails[field] = bookEditorInputs[field].value;
       });
+      bookDetails.purchaseLinks = bookEditorPurchaseInputs.map(inputs => ({
+        label: inputs.label ? inputs.label.value.trim() : '',
+        url: inputs.url ? inputs.url.value.trim() : ''
+      }));
+      bookDetails.purchaseUrl = '';
       renderBookDetails();
       try {
         localStorage.setItem(BOOK_DETAILS_STORAGE_KEY, JSON.stringify({ creativeAct: bookDetails }));
@@ -194,6 +243,11 @@
       BOOK_DETAIL_EDITABLE_FIELDS.forEach(field => {
         if (bookEditorInputs[field]) exportData[field] = bookEditorInputs[field].value;
       });
+      exportData.purchaseLinks = bookEditorPurchaseInputs.map(inputs => ({
+        label: inputs.label ? inputs.label.value.trim() : '',
+        url: inputs.url ? inputs.url.value.trim() : ''
+      }));
+      exportData.purchaseUrl = '';
       const sourceCode = `const BOOK_DETAILS = ${JSON.stringify({ creativeAct: exportData }, null, 2)};`;
       if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
         if (bookEditorStatus) bookEditorStatus.textContent = '이 브라우저에서는 클립보드 복사를 지원하지 않습니다.';
