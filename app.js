@@ -50,17 +50,17 @@
       "subtitleKo": "베를린 일기",
       "author": "최민석 · Choi Min-seok",
       "itemType": "book",
-      "curationNoteKo": "큐레이션 노트를 준비 중입니다.",
-      "curationNoteEn": "Curation note coming soon.",
+      "curationNoteKo": "한 예술단체의 지원으로 베를린에 90일간 머물며 써 내려간 책이다.\n\n이 책을 계기로 최민석 작가의 팬이 되었고 한 번도 뵌 적 없는 작가와 그의 아버지의 안위까지 걱정하게 되었을 정도.\n\n최민석 작가는 경박하지 않으면서도 유쾌하게 글을 쓰는 사람이다. 혼자 보내는 시간이 많은 사람이라면 한 번쯤 읽어보길 권하고 싶다. 교보문고 회원 평점도 무려 9.8점(56명 평가). 유머 코드만 잘 맞는다면 이 책을 시작으로 그의 다른 작품까지 찾아 읽게 될지도 모른다.",
+      "curationNoteEn": "This book was written during the author's 90-day stay in Berlin, supported by an arts organization.\n\nIt was through this book that I became a fan of Minseok Choi. I enjoyed it so much that I even found myself worrying about the well-being of the author and his father, despite never having met either of them.\n\nChoi has a way of writing that is genuinely witty and entertaining without ever feeling frivolous. I'd recommend this book to anyone who spends a lot of time on their own.\n\nIt also holds an impressive rating of 9.8 out of 10 on Kyobo Book Centre, based on 56 reader ratings. If his sense of humor resonates with you, there's a good chance you'll find yourself seeking out his other books after this one.",
       "excerptKo": "",
       "excerptEn": "",
-      "tocKo": "목차 정보를 준비 중입니다.",
+      "tocKo": "베를린 일기 1 ~ ",
       "tocEn": "Table of contents coming soon.",
       "purchaseUrl": "",
       "purchaseLinks": [
         { "label": "알라딘 · Aladin", "url": "" },
-        { "label": "교보문고 · Kyobo", "url": "" },
-        { "label": "예스24 · YES24", "url": "" }
+        { "label": "교보문고 · Kyobo", "url": "http://product.kyobobook.co.kr/detail/S000000619558" },
+        { "label": "예스24 · YES24", "url": "https://www.yes24.com/product/goods/34140164" }
       ]
     },
     "pillow-book": createDefaultBookDetails({
