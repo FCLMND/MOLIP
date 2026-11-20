@@ -328,18 +328,19 @@
     .book-page.is-active { display: block; }
     .book-overview { display: grid; grid-template-columns: 142px minmax(0, 1fr); align-items: start; gap: 20px; }
     #book-cover { display: block; width: 142px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 5px; box-shadow: 0 12px 28px rgba(0, 0, 0, 0.38); }
-    .book-title-en { margin: 3px 0 8px; color: #f2efe9; font-size: 20px; line-height: 1.25; font-weight: 600; }
-    .book-title-ko { margin: 0 0 8px; color: rgba(242, 239, 233, 0.78); font-size: 14px; line-height: 1.5; }
+    .book-title-ko { margin: 3px 0 8px; color: #f2efe9; font-size: 20px; line-height: 1.25; font-weight: 600; }
+    .book-title-en { margin: 0 0 8px; color: rgba(242, 239, 233, 0.78); font-size: 14px; line-height: 1.5; }
     .book-author { color: rgba(242, 239, 233, 0.56); font-size: 11px; letter-spacing: 0.02em; }
     .book-section { margin-top: 21px; }
     .book-section h3 { margin: 0 0 8px; color: #d7ad75; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; }
-    .bilingual-en {
-      margin: 0; color: #f2efe9; font-size: 13.5px; line-height: 1.65; white-space: pre-line;
-    }
     .bilingual-ko {
-      margin: 12px 0 0; padding-top: 12px; color: rgba(242, 239, 233, 0.68);
+      margin: 0; color: #f2efe9;
+      font-size: 13.5px; line-height: 1.75; letter-spacing: -0.01em; white-space: pre-line;
+    }
+    .bilingual-en {
+      margin: 14px 0 0; padding-top: 12px; color: rgba(242, 239, 233, 0.65);
       border-top: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 12.5px; line-height: 1.75; letter-spacing: -0.01em; white-space: pre-line;
+      font-size: 12.5px; line-height: 1.65; white-space: pre-line;
     }
     .book-sound-badge {
       display: inline-flex; align-items: center; margin-top: 22px; padding: 9px 12px;
@@ -362,7 +363,7 @@
     }
     .book-editor-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .book-editor-heading strong { font-size: 13px; }
-    .book-editor-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+    .book-editor-fields { display: grid; grid-template-columns: 1fr; gap: 10px; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
     .book-editor-field { display: flex; flex-direction: column; gap: 5px; color: rgba(242, 239, 233, 0.76); font-size: 10px; }
     .book-editor-field textarea {
       width: 100%; min-height: 76px; resize: vertical; padding: 9px;
@@ -383,8 +384,8 @@
       .book-page { padding: 16px; }
       .book-overview { grid-template-columns: 92px minmax(0, 1fr); gap: 13px; }
       #book-cover { width: 92px; }
-      .book-title-en { font-size: 16px; }
-      .book-title-ko { font-size: 12px; }
+      .book-title-ko { font-size: 16px; }
+      .book-title-en { font-size: 12px; }
       .book-section { margin-top: 17px; }
       #book-admin-editor { inset: 52px 8px 8px; padding: 12px; }
       .book-editor-fields { grid-template-columns: 1fr; }
@@ -484,27 +485,27 @@
           <div class="book-overview">
             <img id="book-cover" src="media/book1.jpg" alt="The Creative Act book cover" />
             <div>
-              <h2 id="book-title-en" class="book-title-en"></h2>
-              <p id="book-title-ko" class="book-title-ko"></p>
+              <h2 id="book-title-ko" class="book-title-ko"></h2>
+              <p id="book-title-en" class="book-title-en"></p>
               <p id="book-author" class="book-author"></p>
             </div>
           </div>
           <section class="book-section">
             <h3>Curation Note</h3>
-            <p id="book-curation-en" class="bilingual-en"></p>
             <p id="book-curation-ko" class="bilingual-ko"></p>
+            <p id="book-curation-en" class="bilingual-en"></p>
           </section>
         </section>
         <section class="book-page" data-book-page="1" aria-hidden="true">
           <section class="book-section" style="margin-top:0;">
             <h3>Selected Excerpt</h3>
-            <p id="book-excerpt-en" class="bilingual-en"></p>
             <p id="book-excerpt-ko" class="bilingual-ko"></p>
+            <p id="book-excerpt-en" class="bilingual-en"></p>
           </section>
           <section class="book-section">
             <h3>Sound Note</h3>
-            <p id="book-archive-note-en" class="bilingual-en"></p>
             <p id="book-archive-note-ko" class="bilingual-ko"></p>
+            <p id="book-archive-note-en" class="bilingual-en"></p>
           </section>
           <div class="book-sound-badge">SOUND OF TOKYO — Field Recording &amp; Guidebook (Coming Soon)</div>
         </section>
@@ -520,12 +521,12 @@
           <button id="book-editor-close" type="button">편집 닫기</button>
         </div>
         <div class="book-editor-fields">
-          <label class="book-editor-field">Curation note — EN<textarea id="book-edit-curation-en"></textarea></label>
           <label class="book-editor-field">Curation note — KO<textarea id="book-edit-curation-ko"></textarea></label>
-          <label class="book-editor-field">Selected excerpt — EN<textarea id="book-edit-excerpt-en"></textarea></label>
+          <label class="book-editor-field">Curation note — EN<textarea id="book-edit-curation-en"></textarea></label>
           <label class="book-editor-field">Selected excerpt — KO<textarea id="book-edit-excerpt-ko"></textarea></label>
-          <label class="book-editor-field">Sound note — EN<textarea id="book-edit-archive-note-en"></textarea></label>
+          <label class="book-editor-field">Selected excerpt — EN<textarea id="book-edit-excerpt-en"></textarea></label>
           <label class="book-editor-field">Sound note — KO<textarea id="book-edit-archive-note-ko"></textarea></label>
+          <label class="book-editor-field">Sound note — EN<textarea id="book-edit-archive-note-en"></textarea></label>
         </div>
         <div class="book-editor-actions">
           <button id="book-editor-preview" type="button">미리보기 적용</button>

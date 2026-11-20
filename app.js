@@ -6,7 +6,7 @@
       "cover": "media/book1.jpg",
       "titleEn": "The Creative Act: A Way of Being",
       "subtitleKo": "창조적 행위: 존재의 방식",
-      "author": "Rick Rubin · 릭 루빈",
+      "author": "릭 루빈 · Rick Rubin",
       "curationNoteEn": "When I first started reading this book, I was honestly a little skeptical.\n\nThe first third or so is filled with rather abstract and philosophical reflections on what creativity is, how everyone has the potential to be a creator, and the importance of observing the world around us and remaining open to our senses. Much of it felt like something I had already come to understand through my own creative practice. At times, some of the ideas seemed so obvious that I wondered whether they really needed to be stated at all.\n\nHowever, as I moved further into the book, my perspective gradually began to change.\n\nRather than focusing on philosophical declarations about creativity, the book begins to explore the challenges that arise in the actual creative process and the mindset needed to navigate them.\n\nWhat I found particularly interesting was how many of these ideas resonated with things I had independently discovered through trial and error while making music. They weren't techniques I had learned from someone else, but principles that had naturally taken shape over years of working. Seeing those experiences reflected and articulated through another creator's perspective turned out to be more meaningful than I had expected.\n\nA book I'd recommend to anyone engaged in any form of creative practice.",
       "curationNoteKo": "\n처음 이 책을 읽기 시작했을 때는 솔직히 조금 회의적이었다.\n책의 초반부 약 3분의 1까지는 창작이란 무엇인가, 누구나 창작자가 될 수 있다는 것, 주변을 관찰하고 감각을 열어두라는 식의 다소 추상적이고 원론적인 이야기들이 이어진다. 이미 창작 활동을 해오면서 스스로 체득한 생각들이기도 했고, 어쩌면 너무 당연해서 굳이 책을 통해 다시 확인할 필요가 있을까 싶은 하나마나한 내용들도 있었다.\n\n하지만 중반부를 지나면서 책을 바라보는 시선이 조금씩 달라졌다.\n 창작을 둘러싼 철학적인 선언보다는 실제 작업 과정에서 마주하게 되는 문제들과 그것을 다루는 태도에 관한 이야기들이 등장한다.\n\n 흥미로웠던 것은 그중 상당수가 내가 음악을 만들면서 혼자 시행착오를 거쳐 발견했던 것들과 상당히 맞닿아 있었다는 점이다. 누군가에게 배워서 적용했다기보다는 오랜 시간 작업하면서 자연스럽게 형성된 나름의 원칙들이었는데, 그것을 다른 창작자의 언어로 다시 확인하는 경험은 생각보다 유의미했다. \n\n당신이 어떤형태로든 창작중이라면 추천해주고싶은 도서",
       "excerptEn": "Selected excerpt coming soon.",
@@ -17,8 +17,8 @@
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
   const BOOK_DETAIL_EDITABLE_FIELDS = [
-    'curationNoteEn', 'curationNoteKo', 'excerptEn',
-    'excerptKo', 'archiveNoteEn', 'archiveNoteKo'
+    'curationNoteKo', 'curationNoteEn', 'excerptKo',
+    'excerptEn', 'archiveNoteKo', 'archiveNoteEn'
   ];
   let bookDetails = { ...BOOK_DETAILS.creativeAct };
   try {
