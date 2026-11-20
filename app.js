@@ -331,7 +331,7 @@
   scene.background = new THREE.Color(0x040406);
   scene.fog = new THREE.FogExp2(0x040406, 0.019);
 
-  const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 140);
+  const camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 140);
   const defaultCameraFov = camera.fov;
   const isTouchDevice = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
   const renderer = new THREE.WebGLRenderer({
@@ -347,10 +347,18 @@
   renderer.toneMappingExposure = 1.14;
   document.body.appendChild(renderer.domElement);
   function updateCameraViewport() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.fov = isTouchDevice && window.innerHeight > window.innerWidth ? 76 : defaultCameraFov;
+    const width = document.documentElement.clientWidth || window.innerWidth;
+    const height = window.innerHeight || document.documentElement.clientHeight;
+    camera.aspect = width / height;
+    camera.fov = isTouchDevice && height > width ? 76 : defaultCameraFov;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setSize(width, height);
+  }
+  let viewportUpdateTimeout = 0;
+  function scheduleCameraViewportUpdate() {
+    updateCameraViewport();
+    window.clearTimeout(viewportUpdateTimeout);
+    viewportUpdateTimeout = window.setTimeout(updateCameraViewport, 150);
   }
   updateCameraViewport();
   setIntroProgress(18);
@@ -659,8 +667,25 @@ let shopZoom = 0.35;
   });
 
   function updateMouseCoords(e) {
-    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+    const width = document.documentElement.clientWidth || window.innerWidth;
+    const height = window.innerHeight || document.documentElement.clientHeight;
+    mouse.x = (e.clientX / width) * 2 - 1;
+    mouse.y = -(e.clientY / height) * 2 + 1;
+  }
+
+  function rotateCamera(dx, dy) {
+    if (camMode === 'shop') {
+      seatYaw -= dx * 0.0085;
+      seatPitch = Math.max(-0.48, Math.min(0.68, seatPitch + dy * 0.0065));
+    } else if (camMode === 'seat' || camMode === 'waiting' || camMode === 'dj') {
+      seatYaw = camMode === 'dj'
+        ? seatYaw - dx * 0.0075
+        : Math.max(-2.6, Math.min(2.6, seatYaw - dx * 0.0075));
+      seatPitch = Math.max(-0.28, Math.min(0.65, seatPitch + dy * 0.006));
+    } else {
+      ax -= dx * 0.0075;
+      ay = Math.max(0.02, Math.min(0.75, ay + dy * 0.0065));
+    }
   }
 
   window.addEventListener('mousedown', e => {
@@ -668,21 +693,81 @@ let shopZoom = 0.35;
     drag = true; downX = px = e.clientX; downY = py = e.clientY;
   });
 
+  let lastTouchDistance = 0, multiTouchGesture = false;
+  const touchDistance = touches => Math.hypot(
+    touches[0].clientX - touches[1].clientX,
+    touches[0].clientY - touches[1].clientY
+  );
+  renderer.domElement.style.touchAction = 'none';
+  renderer.domElement.addEventListener('touchstart', event => {
+    event.preventDefault();
+    if (event.touches.length === 1 && !multiTouchGesture) {
+      const touch = event.touches[0];
+      drag = true;
+      downX = px = touch.clientX;
+      downY = py = touch.clientY;
+    } else if (event.touches.length >= 2) {
+      multiTouchGesture = true;
+      drag = false;
+      lastTouchDistance = touchDistance(event.touches);
+    }
+  }, { passive: false });
+  renderer.domElement.addEventListener('touchmove', event => {
+    event.preventDefault();
+    if (event.touches.length === 1 && drag) {
+      const touch = event.touches[0];
+      const dx = touch.clientX - px, dy = touch.clientY - py;
+      px = touch.clientX;
+      py = touch.clientY;
+      rotateCamera(dx, dy);
+    } else if (event.touches.length >= 2) {
+      const distance = touchDistance(event.touches);
+      if (lastTouchDistance > 0) {
+        const zoomDelta = lastTouchDistance - distance;
+        if (camMode === 'shop') {
+          shopZoom = Math.max(0, Math.min(1, shopZoom + zoomDelta * 0.003));
+        } else if (camMode === 'overview') {
+          rad = Math.max(2.0, Math.min(16.5, rad + zoomDelta * 0.015));
+        }
+      }
+      lastTouchDistance = distance;
+    }
+  }, { passive: false });
+  renderer.domElement.addEventListener('touchend', event => {
+    event.preventDefault();
+    if (event.touches.length === 1) {
+      const touch = event.touches[0];
+      downX = px = touch.clientX;
+      downY = py = touch.clientY;
+      drag = true;
+      lastTouchDistance = 0;
+      return;
+    }
+    if (event.touches.length === 0) {
+      const touch = event.changedTouches[0];
+      drag = false;
+      if (!multiTouchGesture && touch &&
+          Math.hypot(touch.clientX - downX, touch.clientY - downY) < 5) {
+        renderer.domElement.dispatchEvent(new MouseEvent('mouseup', {
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          bubbles: true
+        }));
+      }
+      multiTouchGesture = false;
+      lastTouchDistance = 0;
+    }
+  }, { passive: false });
+  renderer.domElement.addEventListener('touchcancel', () => {
+    drag = false;
+    multiTouchGesture = false;
+    lastTouchDistance = 0;
+  }, { passive: true });
+
   window.addEventListener('mousemove', e => {
     if (drag) {
       const dx = e.clientX - px, dy = e.clientY - py; px = e.clientX; py = e.clientY;
-      if (camMode === 'shop') {
-        seatYaw -= dx * 0.0085;
-        seatPitch = Math.max(-0.48, Math.min(0.68, seatPitch + dy * 0.0065));
-      } else if (camMode === 'seat' || camMode === 'waiting' || camMode === 'dj') {
-        seatYaw = camMode === 'dj'
-          ? seatYaw - dx * 0.0075
-          : Math.max(-2.6, Math.min(2.6, seatYaw - dx * 0.0075));
-        seatPitch = Math.max(-0.28, Math.min(0.65, seatPitch + dy * 0.006));
-      } else {
-        ax -= dx * 0.0075;
-        ay = Math.max(0.02, Math.min(0.75, ay + dy * 0.0065));
-      }
+      rotateCamera(dx, dy);
       return;
     }
     if (e.target === renderer.domElement) {
@@ -1157,7 +1242,7 @@ let shopZoom = 0.35;
     if (!uiBarEl) return;
     uiBarEl.style.opacity = '1';
     uiBarEl.style.transform = 'translateX(-50%) translateY(0px)';
-    uiBarEl.style.pointerEvents = 'auto';
+    uiBarEl.style.pointerEvents = 'none';
 
     clearTimeout(uiHideTimer);
     uiHideTimer = setTimeout(() => {
@@ -1537,8 +1622,8 @@ let shopZoom = 0.35;
       }
     }
   }
-  window.addEventListener('resize', updateCameraViewport);
-  window.addEventListener('orientationchange', updateCameraViewport);
+  window.addEventListener('resize', scheduleCameraViewportUpdate);
+  window.addEventListener('orientationchange', scheduleCameraViewportUpdate);
   setIntroProgress(80);
   loop();
 })();
