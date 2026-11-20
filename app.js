@@ -200,24 +200,23 @@
   function fadeOutIntroAudio(duration) {
     if (!introAudio) return;
     introAudioStopping = true;
-    if (introAudioFadeFrame) cancelAnimationFrame(introAudioFadeFrame);
+    if (introAudioFadeFrame) clearInterval(introAudioFadeFrame);
     const startVolume = introAudio.volume;
     if (introAudio.paused || startVolume <= 0) {
       introAudio.pause();
+      introAudioFadeFrame = 0;
       return;
     }
     const startTime = performance.now();
-    const fade = now => {
-      const progress = Math.min(1, (now - startTime) / duration);
+    introAudioFadeFrame = setInterval(() => {
+      const progress = Math.min(1, (performance.now() - startTime) / duration);
       introAudio.volume = startVolume * (1 - progress);
-      if (progress < 1) {
-        introAudioFadeFrame = requestAnimationFrame(fade);
-      } else {
+      if (progress >= 1) {
+        clearInterval(introAudioFadeFrame);
         introAudio.pause();
         introAudioFadeFrame = 0;
       }
-    };
-    introAudioFadeFrame = requestAnimationFrame(fade);
+    }, 50);
   }
 
   if (introAudio) {
@@ -1184,12 +1183,14 @@ let shopZoom = 0.35;
   }
   function startMainAudioWithFade(duration) {
     if (!aEl || !aEl.src || isArchiveShopAudioActive()) return;
-    if (mainAudioFadeFrame) cancelAnimationFrame(mainAudioFadeFrame);
+    if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
     mainAudioFadeFrame = 0;
     const shouldCrossfade = Boolean(introAudio && !introAudio.paused && aEl.paused);
     const targetVolume = 1.0;
     initAudio();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
+    }
     aEl.muted = false;
     if (!aEl.paused) {
       aEl.volume = targetVolume;
@@ -1197,46 +1198,30 @@ let shopZoom = 0.35;
     }
     if (shouldCrossfade) aEl.volume = 0;
     else aEl.volume = targetVolume;
-    const playAttempt = playMedia(aEl);
-    if (!shouldCrossfade) return;
-
-    const fadeIn = () => {
-      const startTime = performance.now();
-      const fade = now => {
-        const progress = Math.min(1, (now - startTime) / duration);
-        aEl.volume = targetVolume * progress;
-        if (progress < 1) mainAudioFadeFrame = requestAnimationFrame(fade);
-        else {
-          mainAudioFadeFrame = 0;
-          aEl.volume = targetVolume;
-        }
-      };
-      mainAudioFadeFrame = requestAnimationFrame(fade);
-    };
-
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt.then(fadeIn).catch(() => { aEl.volume = targetVolume; });
-    } else {
-      fadeIn();
-    }
+    playMedia(aEl);
+    if (shouldCrossfade) mainAudioFadeFrame = fadeMediaVolume(aEl, targetVolume, duration, () => { mainAudioFadeFrame = 0; });
   }
   let mainAudioFadeFrame = 0, shopAudioFadeFrame = 0, shopAudioPlayPending = false;
+  function fadeMediaVolume(media, targetVolume, duration, onComplete) {
+    const startVolume = media.volume;
+    const startTime = performance.now();
+    const timer = setInterval(() => {
+      const progress = Math.min(1, (performance.now() - startTime) / duration);
+      media.volume = startVolume + (targetVolume - startVolume) * progress;
+      if (progress >= 1) {
+        clearInterval(timer);
+        onComplete();
+      }
+    }, 50);
+    return timer;
+  }
   function fadeShopAudioTo(targetVolume, duration, pauseAtEnd = false) {
     if (!shopAudio) return;
-    if (shopAudioFadeFrame) cancelAnimationFrame(shopAudioFadeFrame);
-    const startVolume = shopAudio.volume;
-    const startTime = performance.now();
-    const fade = now => {
-      const progress = Math.min(1, (now - startTime) / duration);
-      shopAudio.volume = startVolume + (targetVolume - startVolume) * progress;
-      if (progress < 1) {
-        shopAudioFadeFrame = requestAnimationFrame(fade);
-      } else {
-        shopAudioFadeFrame = 0;
-        if (pauseAtEnd) shopAudio.pause();
-      }
-    };
-    shopAudioFadeFrame = requestAnimationFrame(fade);
+    if (shopAudioFadeFrame) clearInterval(shopAudioFadeFrame);
+    shopAudioFadeFrame = fadeMediaVolume(shopAudio, targetVolume, duration, () => {
+      shopAudioFadeFrame = 0;
+      if (pauseAtEnd) shopAudio.pause();
+    });
   }
   function startShopAudioFromUserGesture() {
     if (!shopAudio) return;
@@ -1261,61 +1246,36 @@ let shopZoom = 0.35;
           fadeShopAudioTo(0, 250, true);
           return;
         }
-        fadeShopAudioTo(0.12, 850);
+        fadeShopAudioTo(1.0, 850);
       }).catch(error => {
         shopAudioPlayPending = false;
-        if (error.name !== 'NotAllowedError') console.warn('Archive shop audio playback could not start:', error);
+        console.warn('Archive shop audio playback could not start:', error);
       });
     } else {
       shopAudioPlayPending = false;
-      fadeShopAudioTo(0.12, 850);
+      if (isArchiveShopAudioActive()) fadeShopAudioTo(1.0, 850);
+      else fadeShopAudioTo(0, 250, true);
     }
   }
   function fadeOutMainAudio(duration) {
     if (!aEl || aEl.paused) return;
-    if (mainAudioFadeFrame) cancelAnimationFrame(mainAudioFadeFrame);
-    const targetVolume = aEl.volume;
-    const startTime = performance.now();
-    const fade = now => {
-      const progress = Math.min(1, (now - startTime) / duration);
-      aEl.volume = targetVolume * (1 - progress);
-      if (progress < 1) {
-        mainAudioFadeFrame = requestAnimationFrame(fade);
-      } else {
-        mainAudioFadeFrame = 0;
-        aEl.pause();
-        aEl.volume = targetVolume;
-      }
-    };
-    mainAudioFadeFrame = requestAnimationFrame(fade);
+    if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
+    mainAudioFadeFrame = fadeMediaVolume(aEl, 0, duration, () => {
+      mainAudioFadeFrame = 0;
+      aEl.pause();
+    });
   }
   function fadeInMainAudioAfterShop(duration) {
     if (!aEl || !aEl.src) return;
-    if (mainAudioFadeFrame) cancelAnimationFrame(mainAudioFadeFrame);
+    if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
     mainAudioFadeFrame = 0;
     initAudio();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    const targetVolume = 1.0;
-    aEl.volume = 0;
-    const playAttempt = playMedia(aEl);
-    const fadeIn = () => {
-      const startTime = performance.now();
-      const fade = now => {
-        const progress = Math.min(1, (now - startTime) / duration);
-        aEl.volume = targetVolume * progress;
-        if (progress < 1) mainAudioFadeFrame = requestAnimationFrame(fade);
-        else {
-          mainAudioFadeFrame = 0;
-          aEl.volume = targetVolume;
-        }
-      };
-      mainAudioFadeFrame = requestAnimationFrame(fade);
-    };
-    if (playAttempt && typeof playAttempt.then === 'function') {
-      playAttempt.then(fadeIn).catch(() => { aEl.volume = targetVolume; });
-    } else {
-      fadeIn();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
     }
+    aEl.muted = false;
+    playMedia(aEl);
+    mainAudioFadeFrame = fadeMediaVolume(aEl, 1.0, duration, () => { mainAudioFadeFrame = 0; });
   }
   const visualUpload = document.getElementById('v-up');
   if (visualUpload) {
@@ -1351,6 +1311,8 @@ let shopZoom = 0.35;
         startRoomAudioFromGesture();
         if (vEl && vEl.src) playMedia(vEl);
       } else {
+        if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
+        mainAudioFadeFrame = 0;
         aEl.pause();
       }
     });
@@ -1614,7 +1576,6 @@ let shopZoom = 0.35;
         if (introAudio) fadeOutIntroAudio(850);
         if (shopAudio && shopAudio.paused && !shopAudioPlayPending) startShopAudioFromUserGesture();
       }
-      if (shopAudio) shopAudio.muted = false;
     } else {
       if (wasInShop && shopAudio) {
         fadeShopAudioTo(0, 850, true);
