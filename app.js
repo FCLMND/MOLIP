@@ -71,10 +71,16 @@
     }
     const purchaseLink = document.getElementById('book-purchase-link');
     const purchaseUrl = typeof bookDetails.purchaseUrl === 'string' ? bookDetails.purchaseUrl.trim() : '';
+    const purchaseActionFooter = document.getElementById('book-action-footer');
+    const affiliateNotice = document.getElementById('book-affiliate-notice');
+    const normalizedPurchaseUrl = purchaseUrl.toLowerCase();
     if (purchaseLink) {
-      purchaseLink.hidden = !purchaseUrl;
       if (purchaseUrl) purchaseLink.href = purchaseUrl;
       else purchaseLink.removeAttribute('href');
+    }
+    if (purchaseActionFooter) purchaseActionFooter.hidden = !purchaseUrl;
+    if (affiliateNotice) {
+      affiliateNotice.hidden = !normalizedPurchaseUrl.includes('aladin.co.kr') && !normalizedPurchaseUrl.includes('ttb');
     }
   }
   function setBookDetailPage(pageIndex) {
