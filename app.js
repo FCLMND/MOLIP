@@ -12,13 +12,14 @@
       "excerptEn": "Selected excerpt coming soon.",
       "excerptKo": "Experimentation. Try Everything. Crafting. Momentum. Breaking the Sameness. Completion.",
       "tocKo": "29\nExperimentation\n\n실험을 통한 가능성 탐색\n\n\n30\nTry Everything\n\n판단을 유보하고 다양한 시도하기\n\n\n31\nCrafting\n\n아이디어를 구체적인 결과물로 다듬기\n\n\n32\nMomentum\n\n창작의 흐름 유지하기\n\n\n33\nPoint of View\n\n자신만의 관점 발견하기\n\n\n34\nBreaking the Sameness\n\n반복과 익숙함에서 벗어나기\n\n\n35\nCompletion\n\n작업을 끝까지 완성하기\n\n\n37\nThe Experimenter and the Finisher\n\n탐색과 완성 사이의 균형\n\n\n38\nTemporary Rules\n\n스스로 설정하는 임시적 제약\n\n\n55\n24/7 (Staying in It)\n\n창작의 흐름 안에 머무르기\n\n\n65\nClean Slate\n\n기존의 관성에서 벗어나기\n\n\n69\nPlay\n\n놀이와 유희를 통한 창작",
-      "tocEn": "Table of contents coming soon."
+      "tocEn": "Table of contents coming soon.",
+      "purchaseUrl": ""
     }
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
   const BOOK_DETAIL_EDITABLE_FIELDS = [
     'curationNoteKo', 'curationNoteEn', 'excerptKo',
-    'excerptEn', 'tocKo', 'tocEn'
+    'excerptEn', 'tocKo', 'tocEn', 'purchaseUrl'
   ];
   let bookDetails = { ...BOOK_DETAILS.creativeAct };
   try {
@@ -67,6 +68,13 @@
     if (cover) {
       cover.src = bookDetails.cover;
       cover.alt = `${bookDetails.titleEn} book cover`;
+    }
+    const purchaseLink = document.getElementById('book-purchase-link');
+    const purchaseUrl = typeof bookDetails.purchaseUrl === 'string' ? bookDetails.purchaseUrl.trim() : '';
+    if (purchaseLink) {
+      purchaseLink.hidden = !purchaseUrl;
+      if (purchaseUrl) purchaseLink.href = purchaseUrl;
+      else purchaseLink.removeAttribute('href');
     }
   }
   function setBookDetailPage(pageIndex) {
@@ -141,7 +149,8 @@
       excerptEn: document.getElementById('book-edit-excerpt-en'),
       excerptKo: document.getElementById('book-edit-excerpt-ko'),
       tocKo: document.getElementById('book-edit-toc-ko'),
-      tocEn: document.getElementById('book-edit-toc-en')
+      tocEn: document.getElementById('book-edit-toc-en'),
+      purchaseUrl: document.getElementById('book-edit-purchase-url')
     };
     const bookEditorStatus = document.getElementById('book-editor-status');
     const bookEditorClose = document.getElementById('book-editor-close');
