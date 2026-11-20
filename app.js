@@ -15,9 +15,9 @@
       "tocEn": "Table of contents coming soon.",
       "purchaseUrl": "",
       "purchaseLinks": [
-        { "label": "알라딘 · Aladin", "url": "" },
-        { "label": "교보문고 · Kyobo", "url": "" },
-        { "label": "예스24 · YES24", "url": "" }
+        { "label": "교보문고 · Kyobo", "url": "https://ebook-product.kyobobook.co.kr/dig/epd/ebook/E000005450070" },
+        { "label": "알라딘 - Aladin", "url": "https://aladin.kr/p/UQHm7" },
+        { "label": "Amazon", "url": "https://a.co/d/0iuUUZeU" }
       ]
     }
   };
@@ -111,7 +111,7 @@
     }
     if (purchaseActionFooter) purchaseActionFooter.hidden = purchaseLinks.length === 0;
     if (affiliateNotice) {
-      affiliateNotice.hidden = !purchaseLinks.some(link => /aladin\.co\.kr|ttb/i.test(link.url));
+      affiliateNotice.hidden = !purchaseLinks.some(link => /aladin\.co\.kr|aladin\.kr|ttb/i.test(link.url));
     }
   }
   function setBookDetailPage(pageIndex) {
