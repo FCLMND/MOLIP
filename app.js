@@ -939,6 +939,9 @@ let shopZoom = 0.35;
     bBtn.addEventListener('click', () => {
       if (!breathingToast) return;
       window.clearTimeout(breathingToastTimer);
+      const uiBar = document.getElementById('ui-bar');
+      const bottom = uiBar ? Math.max(16, window.innerHeight - uiBar.getBoundingClientRect().top + 10) : 88;
+      breathingToast.style.bottom = `${bottom}px`;
       breathingToast.classList.add('is-visible');
       breathingToast.setAttribute('aria-hidden', 'false');
       breathingToastTimer = window.setTimeout(() => {
