@@ -586,6 +586,11 @@ let shopZoom = 0.35;
     else button.textContent = label;
     button.setAttribute('aria-label', label);
   }
+  function setControlSubLabel(button, label) {
+    if (!button) return;
+    const subLabelElement = button.querySelector('.mobile-sub');
+    if (subLabelElement) subLabelElement.textContent = label;
+  }
   function updateStatusUI() {
     const totalSeats = beds.length;
     const emptyCount = beds.filter(b => !b.occupied).length;
@@ -608,9 +613,13 @@ let shopZoom = 0.35;
     }
     if (viewBtn) {
       setControlLabel(viewBtn, 'Overview');
+      setControlSubLabel(viewBtn, camMode === 'overview' ? '관람시점' : '전체시점');
       viewBtn.classList.toggle('active', inShop || camMode === 'seat' || camMode === 'waiting' || camMode === 'dj');
     }
-    if (shopNavBtn) setControlLabel(shopNavBtn, inShop ? '← Listening Room' : 'Archive Shop');
+    if (shopNavBtn) {
+      setControlLabel(shopNavBtn, inShop ? '← Listening Room' : 'Archive Shop');
+      setControlSubLabel(shopNavBtn, inShop ? '리스닝룸 복귀' : '큐레이션 관람');
+    }
     if (djViewBtn) {
       djViewBtn.classList.toggle('active', camMode === 'dj');
     }
@@ -667,8 +676,9 @@ let shopZoom = 0.35;
   const shopEntryTrigger = archiveShop ? archiveShop.entryTrigger : null;
 
   shopNavBtn = document.createElement('button');
-  shopNavBtn.innerHTML = '<svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10 12 3.5l8.5 6.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" /><path d="M9 20.5v-7h6v7" /></svg><span class="button-label"></span>';
+  shopNavBtn.innerHTML = '<svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10 12 3.5l8.5 6.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" /><path d="M9 20.5v-7h6v7" /></svg><span class="button-label"></span><span class="mobile-sub"></span>';
   setControlLabel(shopNavBtn, isPlayerInShop() ? '← Listening Room' : 'Archive Shop');
+  setControlSubLabel(shopNavBtn, isPlayerInShop() ? '리스닝룸 복귀' : '큐레이션 관람');
   shopNavBtn.style.cssText = 'padding:8px 15px;border-radius:999px;border:1px solid rgba(217,119,54,0.65);background:rgba(18,16,14,0.82);backdrop-filter:blur(10px);color:#fde68a;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;z-index:30;transition:all 0.2s;';
   document.getElementById('ui-bar').appendChild(shopNavBtn);
 
