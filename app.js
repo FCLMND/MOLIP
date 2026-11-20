@@ -357,19 +357,20 @@
     preserveDrawingBuffer: false,
     failIfMajorPerformanceCaveat: false
   });
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = false;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.14;
   document.body.appendChild(renderer.domElement);
   function updateCameraViewport() {
-    const width = document.documentElement.clientWidth || window.innerWidth;
-    const height = window.innerHeight || document.documentElement.clientHeight;
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth || document.documentElement.clientWidth || window.innerWidth;
+    const height = canvas.clientHeight || window.innerHeight || document.documentElement.clientHeight;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.fov = isTouchDevice && height > width ? 76 : defaultCameraFov;
     camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
   }
   let viewportUpdateTimeout = 0;
   function scheduleCameraViewportUpdate() {
