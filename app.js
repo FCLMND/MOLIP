@@ -572,6 +572,13 @@ let shopZoom = 0.35;
   }
 
   let shopNavBtn = null;
+  function setControlLabel(button, label) {
+    if (!button) return;
+    const labelElement = button.querySelector('.button-label');
+    if (labelElement) labelElement.textContent = label;
+    else button.textContent = label;
+    button.setAttribute('aria-label', label);
+  }
   function updateStatusUI() {
     const totalSeats = beds.length;
     const emptyCount = beds.filter(b => !b.occupied).length;
@@ -593,10 +600,10 @@ let shopZoom = 0.35;
       }
     }
     if (viewBtn) {
-      viewBtn.textContent = 'Overview';
+      setControlLabel(viewBtn, 'Overview');
       viewBtn.classList.toggle('active', inShop || camMode === 'seat' || camMode === 'waiting' || camMode === 'dj');
     }
-    if (shopNavBtn) shopNavBtn.textContent = inShop ? '← Listening Room' : 'Archive Shop';
+    if (shopNavBtn) setControlLabel(shopNavBtn, inShop ? '← Listening Room' : 'Archive Shop');
     if (djViewBtn) {
       djViewBtn.classList.toggle('active', camMode === 'dj');
     }
@@ -653,7 +660,8 @@ let shopZoom = 0.35;
   const shopEntryTrigger = archiveShop ? archiveShop.entryTrigger : null;
 
   shopNavBtn = document.createElement('button');
-  shopNavBtn.textContent = isPlayerInShop() ? '← Listening Room' : 'Archive Shop';
+  shopNavBtn.innerHTML = '<svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 10 12 3.5l8.5 6.5v9a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5z" /><path d="M9 20.5v-7h6v7" /></svg><span class="button-label"></span>';
+  setControlLabel(shopNavBtn, isPlayerInShop() ? '← Listening Room' : 'Archive Shop');
   shopNavBtn.style.cssText = 'padding:8px 15px;border-radius:999px;border:1px solid rgba(217,119,54,0.65);background:rgba(18,16,14,0.82);backdrop-filter:blur(10px);color:#fde68a;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-size:12.5px;font-weight:600;cursor:pointer;z-index:30;transition:all 0.2s;';
   document.getElementById('ui-bar').appendChild(shopNavBtn);
 
@@ -1055,7 +1063,7 @@ let shopZoom = 0.35;
     document.documentElement.classList.remove('cinema-mode');
     document.body.classList.remove('cinema-mode');
     document.body.classList.add('native-fullscreen');
-    if (fsBtn) fsBtn.textContent = 'Exit Fullscreen';
+    if (fsBtn) setControlLabel(fsBtn, 'Exit Fullscreen');
     if (fsWrap) fsWrap.classList.add('active');
     if (vEl && fsVideo && fsCanvas && vEl.src) {
       fsVideo.src = vEl.src;
@@ -1070,7 +1078,7 @@ let shopZoom = 0.35;
   }
   function enterCinemaMode() {
     document.body.classList.remove('native-fullscreen');
-    if (fsBtn) fsBtn.textContent = 'Fullscreen';
+    if (fsBtn) setControlLabel(fsBtn, 'Fullscreen');
     if (fsWrap) fsWrap.classList.remove('active');
     if (fsVideo && !fsVideo.paused) fsVideo.pause();
     document.documentElement.classList.add('cinema-mode');
@@ -1111,7 +1119,7 @@ let shopZoom = 0.35;
     document.body.classList.remove('cinema-mode');
     if (fsWrap) fsWrap.classList.remove('active');
     if (fsVideo && !fsVideo.paused) fsVideo.pause();
-    if (fsBtn) fsBtn.textContent = 'Fullscreen';
+    if (fsBtn) setControlLabel(fsBtn, 'Fullscreen');
     if (exitNativeFullscreen && getFullscreenElement()) {
       const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
       if (typeof exitFullscreen === 'function') {
@@ -1147,7 +1155,7 @@ let shopZoom = 0.35;
     } else {
       if (!document.body.classList.contains('cinema-mode')) {
         isFs = false;
-        if (fsBtn) fsBtn.textContent = 'Fullscreen';
+        if (fsBtn) setControlLabel(fsBtn, 'Fullscreen');
       }
       scheduleCameraViewportUpdate();
     }

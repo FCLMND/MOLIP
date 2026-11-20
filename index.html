@@ -189,6 +189,33 @@
     body.native-fullscreen #ui-bar { z-index: 102; }
     body.native-fullscreen #ui-bar > :not(#fs-btn) { display: none !important; }
     body.native-fullscreen #exit-fs-btn { display: none; }
+    #ui-bar .control-icon { display: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    #ui-bar .button-label { display: inline; }
+    @media (max-width: 768px), (orientation: portrait) {
+      #ui-bar {
+        position: fixed; left: 50%; bottom: calc(16px + env(safe-area-inset-bottom));
+        display: inline-flex; align-items: center; justify-content: center;
+        gap: 10px; width: max-content; max-width: calc(100vw - 24px);
+        padding: 8px 14px; border-radius: 999px;
+        z-index: 9999; pointer-events: auto !important;
+      }
+      #ui-bar > #status-badge,
+      #ui-bar > label.btn,
+      #ui-bar > #v-up,
+      #ui-bar > #a-up,
+      #ui-bar > #sim-btn,
+      #ui-bar > #host-panel { display: none !important; }
+      #ui-bar button, #ui-bar label.btn {
+        position: relative; z-index: 9999 !important; flex: 0 0 40px;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 40px; min-width: 40px; height: 40px; padding: 0 !important;
+        pointer-events: auto !important;
+      }
+      #ui-bar .control-icon { display: block; }
+      #ui-bar .button-label { display: none; }
+      #orientation-hint { display: none !important; }
+      body.native-fullscreen #ui-bar { z-index: 9999; }
+    }
     html.cinema-mode { width: 100%; height: calc(100dvh + 1px); overflow-y: auto; }
     body.cinema-mode { width: 100%; height: 100%; height: 100dvh; overflow: hidden; }
     body.cinema-mode > canvas {
@@ -253,11 +280,23 @@
     <input type="file" id="v-up" accept="video/*" style="display: none;" />
     <label class="btn" for="a-up" style="display: none;">Upload Audio</label>
     <input type="file" id="a-up" accept="audio/*" style="display: none;" />
-    <button id="pp-btn">Play / Pause</button>
-    <button id="breathe-btn">Breathe</button>
-    <button id="view-btn">Overview</button>
+    <button id="pp-btn" type="button" aria-label="Play / Pause">
+      <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" /></svg>
+      <span class="button-label">Play / Pause</span>
+    </button>
+    <button id="breathe-btn" type="button" aria-label="Breathe">
+      <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 8.5 8.5" /><path d="M12 7v5l3.5 2" /><path d="M16.5 4.5h4v4" /></svg>
+      <span class="button-label">Breathe</span>
+    </button>
+    <button id="view-btn" type="button" aria-label="Overview">
+      <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" /><path d="m15.5 8.5-2.2 4.8-4.8 2.2 2.2-4.8z" /></svg>
+      <span class="button-label">Overview</span>
+    </button>
     <button id="sim-btn" style="display: none;">Full Room Test</button>
-    <button id="fs-btn">Fullscreen</button>
+    <button id="fs-btn" type="button" aria-label="Fullscreen">
+      <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5H4.5V8M16 4.5h3.5V8M4.5 16v3.5H8M19.5 16v3.5H16" /><path d="m4.5 4.5 5 5m10-5-5 5m-10 10 5-5m10 5-5-5" /></svg>
+      <span class="button-label">Fullscreen</span>
+    </button>
 
     <div id="host-panel" style="display: none;">
       <input type="text" id="dj-initial-input" maxlength="8" placeholder="FCLMND" value="FCLMND" readonly />
