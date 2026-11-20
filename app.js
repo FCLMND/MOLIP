@@ -1345,6 +1345,7 @@ let shopZoom = 0.35;
     uiBarEl.style.pointerEvents = 'none';
 
     clearTimeout(uiHideTimer);
+    if (window.innerWidth <= 768) return;
     uiHideTimer = setTimeout(() => {
       if (uiBarEl && !uiBarEl.matches(':hover') && document.activeElement !== djInitialInput) {
         uiBarEl.style.opacity = '0';
@@ -1357,6 +1358,7 @@ let shopZoom = 0.35;
   window.addEventListener('mousedown', wakeCinematicUI);
   window.addEventListener('keydown', wakeCinematicUI);
   window.addEventListener('wheel', wakeCinematicUI);
+  window.addEventListener('resize', wakeCinematicUI);
   wakeCinematicUI();
   let ambientTimer = 0, wasInShop = false, resumeMainAudioAfterShop = false;
   let ambientShopVisitPhase = null, ambientShopDwellTimer = 0, ambientShopDwellDuration = 0, ambientReturnBed = null;
