@@ -112,6 +112,9 @@
       border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px; z-index: 20;
       pointer-events: none;
     }
+    @media (pointer: coarse) {
+      #ui-bar { z-index: 9999; pointer-events: auto !important; }
+    }
     #ui-bar button, #ui-bar label.btn, #ui-bar input, #host-panel { pointer-events: auto; }
     button, label.btn {
       background: rgba(255, 255, 255, 0.07); color: #e5e7eb;

@@ -672,8 +672,14 @@ let shopZoom = 0.35;
     updateStatusUI();
   }
 
-  shopNavBtn.addEventListener('click', () => {
+  let lastShopNavActivation = 0;
+  const handleShopNavActivation = event => {
+    if (event.cancelable) event.preventDefault();
+    event.stopPropagation();
     if (!archiveShop) return;
+    const now = performance.now();
+    if (now - lastShopNavActivation < 500) return;
+    lastShopNavActivation = now;
     if (isPlayerInShop()) {
       playerAvatar.root.position.set(-7.6, 0, 18.8);
       playerAvatar.walkTo(-6.8, 18.8, null);
@@ -682,6 +688,9 @@ let shopZoom = 0.35;
     } else {
       enterArchiveShopDirect();
     }
+  };
+  ['pointerup', 'touchend', 'click'].forEach(type => {
+    shopNavBtn.addEventListener(type, handleShopNavActivation);
   });
 
   function updateMouseCoords(e) {
