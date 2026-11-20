@@ -1070,6 +1070,31 @@ let shopZoom = 0.35;
   }
 
   const fsBtn = document.getElementById('fs-btn');
+  let fullscreenHintToast = null, fullscreenHintTimer = 0;
+  function showFullscreenHint() {
+    if (!fullscreenHintToast) {
+      fullscreenHintToast = document.createElement('div');
+      fullscreenHintToast.setAttribute('role', 'status');
+      fullscreenHintToast.setAttribute('aria-live', 'polite');
+      fullscreenHintToast.textContent = 'For true fullscreen on iPhone: Tap Share → Add to Home Screen';
+      fullscreenHintToast.style.cssText = 'position:fixed;left:50%;z-index:10000;width:max-content;max-width:calc(100vw - 32px);padding:10px 16px;color:rgba(255,255,255,0.92);font:12px -apple-system,BlinkMacSystemFont,sans-serif;text-align:center;background:rgba(18,18,22,0.78);border:1px solid rgba(255,255,255,0.16);border-radius:16px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;pointer-events:none;transform:translate(-50%,8px);transition:opacity 0.3s ease,transform 0.3s ease;';
+      document.body.appendChild(fullscreenHintToast);
+    }
+    const uiBar = document.getElementById('ui-bar');
+    const bottom = uiBar ? Math.max(16, window.innerHeight - uiBar.getBoundingClientRect().top + 10) : 88;
+    fullscreenHintToast.style.bottom = `${bottom}px`;
+    fullscreenHintToast.setAttribute('aria-hidden', 'false');
+    window.clearTimeout(fullscreenHintTimer);
+    requestAnimationFrame(() => {
+      fullscreenHintToast.style.opacity = '1';
+      fullscreenHintToast.style.transform = 'translate(-50%,0)';
+    });
+    fullscreenHintTimer = window.setTimeout(() => {
+      fullscreenHintToast.style.opacity = '0';
+      fullscreenHintToast.style.transform = 'translate(-50%,8px)';
+      fullscreenHintToast.setAttribute('aria-hidden', 'true');
+    }, 3500);
+  }
   function getFullscreenElement() {
     return document.fullscreenElement || document.webkitFullscreenElement || null;
   }
@@ -1105,8 +1130,15 @@ let shopZoom = 0.35;
       exitFs();
       return;
     }
-    isFs = true;
     const root = document.documentElement;
+    const isIPhone = /iPhone/i.test(navigator.userAgent) || /iPhone/i.test(navigator.platform);
+    const isStandalone = navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    if (isIPhone && !isStandalone &&
+        typeof root.requestFullscreen !== 'function' && typeof root.webkitRequestFullscreen !== 'function') {
+      showFullscreenHint();
+      return;
+    }
+    isFs = true;
     const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
     if (typeof requestFullscreen !== 'function') {
       enterCinemaMode();
