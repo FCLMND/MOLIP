@@ -899,6 +899,9 @@ let shopZoom = 0.35;
     vEl.loop = true;
     vEl.muted = true;
     vEl.playsInline = true;
+    vEl.setAttribute('loop', '');
+    vEl.setAttribute('muted', '');
+    vEl.setAttribute('playsinline', '');
     vEl.setAttribute('webkit-playsinline', '');
     vEl.crossOrigin = 'anonymous';
     vEl.src = DEFAULT_VISUAL_URL;
@@ -911,6 +914,7 @@ let shopZoom = 0.35;
   }
 
   if (aEl) {
+    aEl.preload = 'auto';
     aEl.src = DEFAULT_SOUND_URL;
     window.addEventListener('pointerdown', function startDefaultAudio() {
       if (isArchiveShopAudioActive()) return;
@@ -1525,7 +1529,8 @@ let shopZoom = 0.35;
       }
     }
   }
-  window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+  window.addEventListener('resize', updateCameraViewport);
+  window.addEventListener('orientationchange', updateCameraViewport);
   setIntroProgress(80);
   loop();
 })();

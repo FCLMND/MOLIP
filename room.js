@@ -1154,7 +1154,11 @@ window.ArchiveShop = {
     shopVideoEl.playsInline = true;
     shopVideoEl.preload = 'auto';
     shopVideoEl.crossOrigin = 'anonymous';
+    shopVideoEl.setAttribute('loop', '');
+    shopVideoEl.setAttribute('muted', '');
+    shopVideoEl.setAttribute('playsinline', '');
     shopVideoEl.setAttribute('webkit-playsinline', '');
+    shopVideoEl.setAttribute('preload', 'auto');
     shopVideoEl.src = 'media/shop_visual.mp4';
     shopVideoEl.addEventListener('canplay', () => {
       shopVideoEl.play().then(() => {
