@@ -268,6 +268,7 @@
     if (!introLoader || !introReady || introDismissed) return;
     introDismissed = true;
     fadeOutIntroAudio(850);
+    document.getElementById('ui-bar').classList.add('is-entered');
     introLoader.classList.add('is-exiting');
     window.setTimeout(() => introLoader.remove(), 850);
   }
