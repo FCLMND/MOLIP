@@ -112,8 +112,8 @@
       position: fixed; bottom: calc(12px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
       display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: center;
       gap: 8px; padding: 10px 16px;
-      background: rgba(255, 255, 255, 0.14) !important; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.25) !important; border-radius: 999px; z-index: 20;
+      background: rgba(14, 14, 17, 0.42) !important; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.14) !important; border-radius: 999px; z-index: 20;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
       pointer-events: none;
     }
@@ -127,14 +127,16 @@
       line-height: 1.25;
     }
     #ui-bar button {
-      background: rgba(255, 255, 255, 0.14); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      background: rgba(18, 18, 22, 0.72) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #f2efe9 !important;
     }
     #ui-bar button.active {
-      background: rgba(255, 184, 102, 0.22); border-color: rgba(255, 184, 102, 0.65); color: #ffd599;
+      background: rgba(255, 184, 102, 0.22) !important;
+      border-color: rgba(255, 184, 102, 0.65) !important; color: #e2b475 !important;
     }
     #ui-bar .mobile-sub {
-      display: block; font-size: 9.5px; opacity: 0.72; margin-top: 1px;
+      display: block; color: inherit; font-size: 9.5px; opacity: 1; margin-top: 1px;
       font-weight: 400; letter-spacing: -0.02em;
     }
     button, label.btn {
@@ -225,10 +227,14 @@
         pointer-events: auto !important;
       }
       #ui-bar .mobile-sub {
-        font-size: 8.5px; opacity: 0.72; margin-top: 1px;
+        font-size: 8.5px; margin-top: 1px;
       }
       #ui-bar .mobile-row-break { display: none !important; }
       body.native-fullscreen #ui-bar { z-index: 9999; }
+    }
+    @media (min-width: 769px) {
+      #ui-bar { padding: 10px 22px !important; gap: 14px !important; }
+      #ui-bar button { padding: 8px 18px !important; }
     }
     html.cinema-mode { width: 100%; height: calc(100dvh + 1px); overflow-y: auto; }
     body.cinema-mode { width: 100%; height: 100%; height: 100dvh; overflow: hidden; }
