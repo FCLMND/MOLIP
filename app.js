@@ -979,6 +979,7 @@ let shopZoom = 0.35;
     }
   }
   const shopAudio = typeof window.Audio === 'function' ? new window.Audio() : null;
+  const SHOP_AUDIO_VOLUME = 0.48;
   const shopAudioPaths = ['./media/shop_sound.mp3'];
   let shopAudioPathIndex = 0;
 
@@ -994,7 +995,7 @@ let shopZoom = 0.35;
 
   if (shopAudio) {
     shopAudio.loop = true;
-    shopAudio.volume = 0;
+    shopAudio.volume = SHOP_AUDIO_VOLUME;
     shopAudio.preload = 'auto';
     shopAudio.addEventListener('error', loadShopAudioFallback);
     loadShopAudioFallback();
@@ -1219,7 +1220,7 @@ let shopZoom = 0.35;
       dataArray = new Uint8Array(analyser.frequencyBinCount);
     }
   }
-  let mainAudioFadeFrame = 0, shopAudioFadeFrame = 0, shopAudioPlayPending = false;
+  let mainAudioFadeFrame = 0, shopAudioFadeFrame = 0, shopAudioPlayPending = false, shopAudioPlayRequest = 0;
   function fadeMediaVolume(media, targetVolume, duration, onComplete) {
     const startVolume = media.volume;
     const startTime = performance.now();
@@ -1243,6 +1244,10 @@ let shopZoom = 0.35;
   }
   function startShopAudioFromUserGesture() {
     if (!shopAudio) return;
+    if (shopAudioFadeFrame) clearInterval(shopAudioFadeFrame);
+    shopAudioFadeFrame = 0;
+    const playRequest = ++shopAudioPlayRequest;
+    shopAudioPlayPending = false;
     shopAudio.muted = false;
     initAudio();
     if (audioCtx && audioCtx.state === 'suspended') {
@@ -1259,19 +1264,21 @@ let shopZoom = 0.35;
     shopAudioPlayPending = true;
     if (playAttempt && typeof playAttempt.then === 'function') {
       playAttempt.then(() => {
+        if (playRequest !== shopAudioPlayRequest) return;
         shopAudioPlayPending = false;
         if (!isArchiveShopAudioActive()) {
           fadeShopAudioTo(0, 250, true);
           return;
         }
-        fadeShopAudioTo(1.0, 850);
+        fadeShopAudioTo(SHOP_AUDIO_VOLUME, 850);
       }).catch(error => {
+        if (playRequest !== shopAudioPlayRequest) return;
         shopAudioPlayPending = false;
         console.warn('Archive shop audio playback could not start:', error);
       });
     } else {
       shopAudioPlayPending = false;
-      if (isArchiveShopAudioActive()) fadeShopAudioTo(1.0, 850);
+      if (isArchiveShopAudioActive()) fadeShopAudioTo(SHOP_AUDIO_VOLUME, 850);
       else fadeShopAudioTo(0, 250, true);
     }
   }
@@ -1320,11 +1327,39 @@ let shopZoom = 0.35;
     });
   }
   const playbackBtn = document.getElementById('pp-btn');
+  function updatePlaybackButton() {
+    if (!playbackBtn) return;
+    const media = isArchiveShopAudioActive() ? shopAudio : aEl;
+    const isPlaying = Boolean(media && !media.paused);
+    setControlLabel(playbackBtn, isPlaying ? 'Pause' : 'Play');
+    const icon = playbackBtn.querySelector('.control-icon path');
+    if (icon) icon.setAttribute('d', isPlaying ? 'M8 5.5v13M16 5.5v13' : 'M8 5.5v13l10-6.5z');
+  }
   if (playbackBtn) {
+    [aEl, shopAudio].forEach(media => {
+      if (!media) return;
+      media.addEventListener('play', updatePlaybackButton);
+      media.addEventListener('pause', updatePlaybackButton);
+      media.addEventListener('ended', updatePlaybackButton);
+    });
+    updatePlaybackButton();
     playbackBtn.addEventListener('click', () => {
+      if (isArchiveShopAudioActive()) {
+        if (!shopAudio) return;
+        if (shopAudio.paused && !shopAudioPlayPending) {
+          startShopAudioFromUserGesture();
+        } else {
+          ++shopAudioPlayRequest;
+          shopAudioPlayPending = false;
+          if (shopAudioFadeFrame) clearInterval(shopAudioFadeFrame);
+          shopAudioFadeFrame = 0;
+          shopAudio.pause();
+        }
+        updatePlaybackButton();
+        return;
+      }
       if (!aEl) return;
       if (aEl.paused) {
-        if (isArchiveShopAudioActive()) return;
         startRoomAudioFromGesture();
         syncRoomMedia(false);
       } else {
@@ -1332,6 +1367,7 @@ let shopZoom = 0.35;
         mainAudioFadeFrame = 0;
         aEl.pause();
       }
+      updatePlaybackButton();
     });
   }
 
@@ -1587,7 +1623,10 @@ let shopZoom = 0.35;
         resumeMainAudioAfterShop = Boolean(aEl && !aEl.paused);
         fadeOutMainAudio(850);
         if (introAudio) fadeOutIntroAudio(850);
-        if (shopAudio && shopAudio.paused && !shopAudioPlayPending) startShopAudioFromUserGesture();
+        if (shopAudio && !shopAudioPlayPending) {
+          if (shopAudio.paused) startShopAudioFromUserGesture();
+          else if (shopAudioFadeFrame) fadeShopAudioTo(SHOP_AUDIO_VOLUME, 850);
+        }
       }
     } else {
       if (wasInShop && shopAudio) {
@@ -1599,6 +1638,7 @@ let shopZoom = 0.35;
       }
       resumeMainAudioAfterShop = false;
     }
+    if (inShopNow !== wasInShop) updatePlaybackButton();
     wasInShop = inShopNow;
 
     if (vEl && !vEl.paused && vEl.readyState >= 2 &&
