@@ -1044,13 +1044,15 @@ let shopZoom = 0.35;
   }
 
   const fsBtn = document.getElementById('fs-btn');
+  function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
   function showFullscreenVideo() {
-    if (!fsWrap) return;
     document.documentElement.classList.remove('cinema-mode');
     document.body.classList.remove('cinema-mode');
     document.body.classList.add('native-fullscreen');
     if (fsBtn) fsBtn.textContent = 'Exit Fullscreen';
-    fsWrap.classList.add('active');
+    if (fsWrap) fsWrap.classList.add('active');
     if (vEl && fsVideo && fsCanvas && vEl.src) {
       fsVideo.src = vEl.src;
       fsVideo.currentTime = vEl.currentTime;
@@ -1073,25 +1075,24 @@ let shopZoom = 0.35;
     window.scrollTo(0, 1);
   }
   function enterFullscreen() {
-    if (isFs) {
+    if (getFullscreenElement() || (isFs && document.body.classList.contains('cinema-mode'))) {
       exitFs();
       return;
     }
     isFs = true;
-    const requestFullscreen = document.documentElement.requestFullscreen;
+    const root = document.documentElement;
+    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
     if (typeof requestFullscreen !== 'function') {
       enterCinemaMode();
       return;
     }
     try {
-      const request = requestFullscreen.call(document.documentElement);
-      if (request && typeof request.then === 'function') {
-        request.then(showFullscreenVideo).catch(error => {
+      const request = requestFullscreen.call(root);
+      if (request && typeof request.catch === 'function') {
+        request.catch(error => {
           console.warn('Fullscreen request failed; using cinema mode:', error);
-          if (isFs) enterCinemaMode();
+          if (isFs && !getFullscreenElement()) enterCinemaMode();
         });
-      } else {
-        showFullscreenVideo();
       }
     } catch (error) {
       console.warn('Fullscreen request failed; using cinema mode:', error);
@@ -1099,7 +1100,7 @@ let shopZoom = 0.35;
     }
   }
   if (fsBtn) fsBtn.addEventListener('click', enterFullscreen);
-  function exitFs() {
+  function exitFs(exitNativeFullscreen = true) {
     isFs = false;
     document.body.classList.remove('native-fullscreen');
     document.documentElement.classList.remove('cinema-mode');
@@ -1107,15 +1108,48 @@ let shopZoom = 0.35;
     if (fsWrap) fsWrap.classList.remove('active');
     if (fsVideo && !fsVideo.paused) fsVideo.pause();
     if (fsBtn) fsBtn.textContent = 'Fullscreen';
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-    updateCameraViewport();
+    if (exitNativeFullscreen && getFullscreenElement()) {
+      const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
+      if (typeof exitFullscreen === 'function') {
+        try {
+          const exitAttempt = exitFullscreen.call(document);
+          if (exitAttempt && typeof exitAttempt.catch === 'function') {
+            exitAttempt.catch(error => {
+              console.warn('Fullscreen exit failed:', error);
+              syncFullscreenState();
+            });
+          }
+        } catch (error) {
+          console.warn('Fullscreen exit failed:', error);
+          syncFullscreenState();
+        }
+      } else {
+        console.warn('Fullscreen exit is not supported by this browser.');
+        syncFullscreenState();
+      }
+    }
+    scheduleCameraViewportUpdate();
     window.scrollTo(0, 0);
   }
   const exitFsBtn = document.getElementById('exit-fs-btn');
   if (exitFsBtn) exitFsBtn.addEventListener('click', exitFs);
-  document.addEventListener('fullscreenchange', () => {
-    if (!document.fullscreenElement && isFs && !document.body.classList.contains('cinema-mode')) exitFs();
-  });
+  function syncFullscreenState() {
+    if (getFullscreenElement()) {
+      isFs = true;
+      showFullscreenVideo();
+      scheduleCameraViewportUpdate();
+    } else if (document.body.classList.contains('native-fullscreen')) {
+      exitFs(false);
+    } else {
+      if (!document.body.classList.contains('cinema-mode')) {
+        isFs = false;
+        if (fsBtn) fsBtn.textContent = 'Fullscreen';
+      }
+      scheduleCameraViewportUpdate();
+    }
+  }
+  document.addEventListener('fullscreenchange', syncFullscreenState);
+  document.addEventListener('webkitfullscreenchange', syncFullscreenState);
 
   let audioCtx, analyser, muffleFilter, dataArray;
   function initAudio() {
