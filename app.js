@@ -679,6 +679,7 @@ let shopZoom = 0.35;
     camMode = 'shop';
     seatYaw = 0;
     seatPitch = 0.02;
+    startShopVideoFromGesture();
     startShopAudioFromUserGesture();
     updateStatusUI();
   }
@@ -958,6 +959,14 @@ let shopZoom = 0.35;
     shopVisual.setAttribute('webkit-playsinline', '');
   }
   let shopVisualActive = false;
+  function startShopVideoFromGesture() {
+    if (!archiveShop || !archiveShop.shopVideoEl) return;
+    archiveShop.shopVideoEl.muted = true;
+    const playAttempt = archiveShop.shopVideoEl.play();
+    if (playAttempt && typeof playAttempt.catch === 'function') {
+      playAttempt.catch(error => console.warn('Archive shop video playback could not start:', error));
+    }
+  }
   const shopAudio = typeof window.Audio === 'function' ? new window.Audio() : null;
   const shopAudioPaths = ['./media/shop_sound.mp3'];
   let shopAudioPathIndex = 0;
@@ -1592,7 +1601,7 @@ let shopZoom = 0.35;
         wall.material.map && wall.material.map.isVideoTexture) {
       wall.material.map.needsUpdate = true;
     }
-    if (archiveShop && archiveShop.shopVideoEl && !archiveShop.shopVideoEl.paused &&
+    if (inShopNow && archiveShop && archiveShop.shopVideoEl &&
         archiveShop.shopVideoEl.readyState >= 2 && archiveShop.shopArtMat.map &&
         archiveShop.shopArtMat.map.isVideoTexture) {
       archiveShop.shopArtMat.map.needsUpdate = true;

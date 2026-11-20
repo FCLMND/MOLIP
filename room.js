@@ -1161,10 +1161,9 @@ window.ArchiveShop = {
     shopVideoEl.setAttribute('preload', 'auto');
     shopVideoEl.src = 'media/shop_visual.mp4';
     shopVideoEl.addEventListener('canplay', () => {
-      shopVideoEl.play().then(() => {
-        shopArtMat.map = createShopVideoTexture(shopVideoEl);
-        shopArtMat.needsUpdate = true;
-      }).catch(error => {
+      shopArtMat.map = createShopVideoTexture(shopVideoEl);
+      shopArtMat.needsUpdate = true;
+      shopVideoEl.play().catch(error => {
         if (error.name !== 'NotAllowedError') console.warn('Archive shop video playback could not start:', error);
       });
     }, { once: true });
