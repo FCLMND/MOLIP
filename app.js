@@ -252,7 +252,7 @@
     window.setTimeout(() => introLoader.remove(), 850);
   }
 
-  function startRoomMediaFromGesture() {
+  function startRoomAudioFromGesture() {
     initAudio();
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
@@ -271,7 +271,10 @@
         console.warn('Room audio playback could not start:', error);
       }
     }
+  }
 
+  function startRoomMediaFromGesture() {
+    startRoomAudioFromGesture();
     if (vEl) {
       vEl.muted = true;
       try {
@@ -915,6 +918,7 @@ let shopZoom = 0.35;
 
   if (aEl) {
     aEl.preload = 'auto';
+    aEl.setAttribute('playsinline', '');
     aEl.src = DEFAULT_SOUND_URL;
     window.addEventListener('pointerdown', function startDefaultAudio() {
       if (isArchiveShopAudioActive()) return;
@@ -975,11 +979,16 @@ let shopZoom = 0.35;
     if (mainAudioFadeFrame) cancelAnimationFrame(mainAudioFadeFrame);
     mainAudioFadeFrame = 0;
     const shouldCrossfade = Boolean(introAudio && !introAudio.paused && aEl.paused);
-    const targetVolume = aEl.volume;
+    const targetVolume = 1.0;
     initAudio();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    if (!aEl.paused) return;
+    aEl.muted = false;
+    if (!aEl.paused) {
+      aEl.volume = targetVolume;
+      return;
+    }
     if (shouldCrossfade) aEl.volume = 0;
+    else aEl.volume = targetVolume;
     const playAttempt = playMedia(aEl);
     if (!shouldCrossfade) return;
 
@@ -1131,8 +1140,7 @@ let shopZoom = 0.35;
       if (!aEl) return;
       if (aEl.paused) {
         if (isArchiveShopAudioActive()) return;
-        if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-        if (aEl.src) playMedia(aEl);
+        startRoomAudioFromGesture();
         if (vEl && vEl.src) playMedia(vEl);
       } else {
         aEl.pause();
