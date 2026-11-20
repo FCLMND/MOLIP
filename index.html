@@ -179,7 +179,31 @@
     }
     #td-fs-wrap.active { display: flex; }
     #td-fs-video, #td-fs-canvas { width: 100%; height: 100%; object-fit: cover; }
-    #exit-fs-btn { position: fixed; top: 20px; right: 24px; z-index: 101; }
+    #exit-fs-btn {
+      display: none; position: fixed; top: calc(env(safe-area-inset-top, 0px) + 14px);
+      right: calc(env(safe-area-inset-right, 0px) + 16px); z-index: 110;
+    }
+    #td-fs-wrap.active + #exit-fs-btn { display: block; }
+    body.native-fullscreen #ui-bar { z-index: 102; }
+    body.native-fullscreen #ui-bar > :not(#fs-btn) { display: none !important; }
+    body.native-fullscreen #exit-fs-btn { display: none; }
+    html.cinema-mode { width: 100%; height: calc(100dvh + 1px); overflow-y: auto; }
+    body.cinema-mode { width: 100%; height: 100%; height: 100dvh; overflow: hidden; }
+    body.cinema-mode > canvas {
+      position: fixed; inset: 0; width: 100vw !important; height: 100dvh !important; z-index: 0;
+    }
+    body.cinema-mode #ui-bar,
+    body.cinema-mode #admin-panel,
+    body.cinema-mode #breathing-toast,
+    body.cinema-mode #orientation-hint,
+    body.cinema-mode #molip-loader { display: none !important; }
+    body.cinema-mode #exit-fs-btn {
+      display: grid; place-items: center; width: 38px; height: 38px; padding: 0;
+      color: rgba(255, 255, 255, 0.88); font-size: 0;
+      background: rgba(18, 18, 22, 0.48); border-color: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    body.cinema-mode #exit-fs-btn::before { content: "×"; font-size: 22px; line-height: 1; }
   </style>
 </head>
 <body>
@@ -241,14 +265,14 @@
   </div>
 
   <div id="td-fs-wrap">
-    <button id="exit-fs-btn">Exit Fullscreen</button>
     <video id="td-fs-video" loop muted preload="auto" playsinline webkit-playsinline crossorigin="anonymous"></video>
     <canvas id="td-fs-canvas" width="1024" height="576"></canvas>
   </div>
+  <button id="exit-fs-btn" type="button" aria-label="Exit Fullscreen">Exit Fullscreen</button>
 
   <video id="td-v" loop muted preload="auto" playsinline webkit-playsinline crossorigin="anonymous" style="display:none;"></video>
   <video id="shop-v" src="media/shop_visual.mp4" loop muted playsinline webkit-playsinline preload="auto" style="display:none;" onerror="console.error('Shop video load failed:', this.src)"></video>
-  <audio id="rm-a" loop style="display:none;"></audio>
+  <audio id="rm-a" loop playsinline preload="auto" style="display:none;"></audio>
 
   <script src="three.min.js"></script>
   <script src="textures.js"></script>
