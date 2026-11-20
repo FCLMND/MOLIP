@@ -581,9 +581,14 @@ let shopZoom = 0.35;
   let shopNavBtn = null;
   function setControlLabel(button, label) {
     if (!button) return;
-    const labelElement = button.querySelector('.button-label');
-    if (labelElement) labelElement.textContent = label;
-    else button.textContent = label;
+    let labelElement = button.querySelector('.button-label');
+    if (!labelElement) {
+      labelElement = document.createElement('span');
+      labelElement.className = 'button-label';
+      const subLabelElement = button.querySelector('.mobile-sub');
+      button.insertBefore(labelElement, subLabelElement);
+    }
+    labelElement.textContent = label;
     button.setAttribute('aria-label', label);
   }
   function setControlSubLabel(button, label) {
