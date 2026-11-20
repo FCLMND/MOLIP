@@ -342,6 +342,7 @@
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       font-size: 12.5px; line-height: 1.65; white-space: pre-line;
     }
+    .book-toc-ko, .book-toc-en { line-height: 1.8; white-space: pre-line; }
     .book-sound-badge {
       display: inline-flex; align-items: center; margin-top: 22px; padding: 9px 12px;
       color: #e7c89d; background: rgba(215, 173, 117, 0.08);
@@ -503,9 +504,9 @@
             <p id="book-excerpt-en" class="bilingual-en"></p>
           </section>
           <section class="book-section">
-            <h3>Sound Note</h3>
-            <p id="book-archive-note-ko" class="bilingual-ko"></p>
-            <p id="book-archive-note-en" class="bilingual-en"></p>
+            <h3>목차 · Table of Contents</h3>
+            <p id="book-toc-ko" class="bilingual-ko book-toc-ko"></p>
+            <p id="book-toc-en" class="bilingual-en book-toc-en"></p>
           </section>
           <div class="book-sound-badge">SOUND OF TOKYO — Field Recording &amp; Guidebook (Coming Soon)</div>
         </section>
@@ -525,8 +526,8 @@
           <label class="book-editor-field">Curation note — EN<textarea id="book-edit-curation-en"></textarea></label>
           <label class="book-editor-field">Selected excerpt — KO<textarea id="book-edit-excerpt-ko"></textarea></label>
           <label class="book-editor-field">Selected excerpt — EN<textarea id="book-edit-excerpt-en"></textarea></label>
-          <label class="book-editor-field">Sound note — KO<textarea id="book-edit-archive-note-ko"></textarea></label>
-          <label class="book-editor-field">Sound note — EN<textarea id="book-edit-archive-note-en"></textarea></label>
+          <label class="book-editor-field">책 목차 (한글 KO)<textarea id="book-edit-toc-ko"></textarea></label>
+          <label class="book-editor-field">책 목차 (영문 EN)<textarea id="book-edit-toc-en"></textarea></label>
         </div>
         <div class="book-editor-actions">
           <button id="book-editor-preview" type="button">미리보기 적용</button>
