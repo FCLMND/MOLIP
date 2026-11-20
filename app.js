@@ -252,26 +252,20 @@
   }
 
   let audioHardwarePulsePlayed = false;
-  function startRoomAudioFromGesture() {
+  function startRoomAudioFromGesture(reset = false) {
     initAudio();
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
     }
 
-    if (audioCtx && !audioHardwarePulsePlayed) {
-      audioHardwarePulsePlayed = true;
-      try {
-        const pulse = audioCtx.createOscillator();
-        const pulseGain = audioCtx.createGain();
-        pulse.frequency.value = 440;
-        pulseGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
-        pulse.connect(pulseGain);
-        pulseGain.connect(audioCtx.destination);
-        pulse.start();
-        pulse.stop(audioCtx.currentTime + 0.02);
-      } catch (error) {
-        console.warn('Audio hardware could not be activated:', error);
+    if (reset) {
+      if (shopAudioFadeFrame) clearInterval(shopAudioFadeFrame);
+      shopAudioFadeFrame = 0;
+      if (shopAudio) {
+        shopAudio.pause();
+        shopAudio.volume = 0;
       }
+      if (aEl) aEl.currentTime = 0;
     }
 
     if (aEl) {
@@ -287,10 +281,26 @@
         console.warn('Room audio playback could not start:', error);
       }
     }
+    if (audioCtx && !audioHardwarePulsePlayed) {
+      audioHardwarePulsePlayed = true;
+      try {
+        const pulse = audioCtx.createOscillator();
+        const pulseGain = audioCtx.createGain();
+        pulse.frequency.value = 440;
+        pulseGain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+        pulse.connect(pulseGain);
+        pulseGain.connect(audioCtx.destination);
+        pulse.start();
+        pulse.stop(audioCtx.currentTime + 0.02);
+      } catch (error) {
+        console.warn('Audio hardware could not be activated:', error);
+      }
+    }
   }
 
   function startRoomMediaFromGesture() {
-    startRoomAudioFromGesture();
+    startRoomAudioFromGesture(true);
+    startShopVideoFromGesture();
     if (vEl) {
       vEl.muted = true;
       try {
@@ -325,13 +335,8 @@
         event.stopPropagation();
         return;
       }
-      if (isTouchDevice || event.pointerType === 'touch') {
-        startRoomMediaFromGesture();
-        dismissIntro(false);
-      } else {
-        tryPlayIntroAudio();
-        dismissIntro(true);
-      }
+      startRoomMediaFromGesture();
+      dismissIntro(false);
     };
     introLoader.addEventListener('pointerdown', handleIntroEntry, true);
     introLoader.addEventListener('touchend', handleIntroEntry, { capture: true, passive: true });
@@ -1053,6 +1058,7 @@ let shopZoom = 0.35;
     aEl.setAttribute('playsinline', '');
     aEl.src = DEFAULT_SOUND_URL;
     window.addEventListener('pointerdown', function startDefaultAudio() {
+      if (!introDismissed) return;
       if (isArchiveShopAudioActive()) return;
       if (aEl.paused && aEl.src) {
         initAudio();
