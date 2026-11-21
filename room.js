@@ -2240,7 +2240,7 @@ window.ArchiveShop = {
       louverGroup.add(slat);
     }
 
-    const cornerX = startX + (endX - startX) * (43.5 / 45);
+    const cornerX = startX + (endX - startX) * (1.5 / 45);
     const hanjiFiberCanvas = document.createElement('canvas');
     hanjiFiberCanvas.width = 512;
     hanjiFiberCanvas.height = 512;
@@ -2263,15 +2263,16 @@ window.ArchiveShop = {
       hanjiFiberContext.stroke();
     }
     for (let y = 8; y < 512; y += 14) {
-      hanjiFiberContext.fillStyle = 'rgba(118, 79, 45, 0.28)';
-      hanjiFiberContext.fillRect(0, y, 512, 2);
+      hanjiFiberContext.fillStyle = 'rgba(118, 79, 45, 0.37)';
+      hanjiFiberContext.fillRect(0, y, 512, 2.7);
       hanjiFiberContext.fillStyle = 'rgba(255, 247, 221, 0.35)';
-      hanjiFiberContext.fillRect(0, y + 2, 512, 1);
+      hanjiFiberContext.fillRect(0, y + 2.7, 512, 1);
     }
     const hanjiFiberTexture = new THREE.CanvasTexture(hanjiFiberCanvas);
     const hanjiLanternMat = new THREE.MeshStandardMaterial({
       map: hanjiFiberTexture,
       bumpMap: hanjiFiberTexture,
+      emissiveMap: hanjiFiberTexture,
       bumpScale: 0.014,
       color: 0xffe6c6,
       emissive: 0xffb366,
@@ -2289,10 +2290,13 @@ window.ArchiveShop = {
     const hanjiLanternShade = new THREE.Mesh(new THREE.LatheGeometry(hanjiLanternProfile, 32), hanjiLanternMat);
     hanjiLantern.add(hanjiLanternShade);
     const hanjiCordMat = new THREE.MeshStandardMaterial({ color: 0x201c19, roughness: 0.85 });
-    const hanjiLanternCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 2.65, 6), hanjiCordMat);
-    hanjiLanternCord.position.y = (1.05 + shopH - 1.6) / 2;
+    const hanjiLanternCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 2.55, 6), hanjiCordMat);
+    hanjiLanternCord.position.y = (1.05 + shopH - 1.5) / 2;
     hanjiLantern.add(hanjiLanternCord);
-    hanjiLantern.position.set(cornerX, 1.6, rightWallZ + 0.60);
+    const hanjiLanternLight = new THREE.PointLight(0xffb86c, 2.2, 5.5, 1.5);
+    hanjiLanternLight.position.y = 0.02;
+    hanjiLantern.add(hanjiLanternLight);
+    hanjiLantern.position.set(cornerX, 1.5, rightWallZ + 0.60);
     shopGroup.add(hanjiLantern);
 
     const hanjiFishCanvas = document.createElement('canvas');
