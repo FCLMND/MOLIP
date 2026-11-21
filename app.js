@@ -59,8 +59,8 @@
       "purchaseUrl": "",
       "purchaseLinks": [
         { "label": "알라딘 · Aladin", "url": "" },
-        { "label": "교보문고 · Kyobo", "url": "http://product.kyobobook.co.kr/detail/S000000619558" },
-        { "label": "예스24 · YES24", "url": "https://www.yes24.com/product/goods/34140164" }
+        { "label": "교보문고 · Kyobo", "url": "http://app.ac/xqDPRD213" },
+        { "label": "예스24 · YES24", "url": "http://app.ac/XEw5VnS13" }
       ]
     },
     "pillow-book": createDefaultBookDetails({
