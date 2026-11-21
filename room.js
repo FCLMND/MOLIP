@@ -1770,6 +1770,65 @@ window.ArchiveShop = {
     };
     clickables.push(book6Mesh);
 
+    const magazineItems = [
+      { itemId: 'magazine-1', offset: 4.77, cover: 'media/magazine_1.jpg', titleEn: 'POPEYE Issue 953 — The Work I Do Now', subtitleKo: '뽀빠이 매거진 953호', coverText: 'THE WORK I DO NOW', background: '#f1ecdf', foreground: '#355444' },
+      { itemId: 'magazine-2', offset: 4.30, cover: 'media/magazine_2.jpg', titleEn: 'POPEYE Magazine — Archive Issue 02', subtitleKo: '뽀빠이 매거진 아카이브 02', coverText: 'ARCHIVE ISSUE 02', background: '#355444', foreground: '#f1ecdf' }
+    ];
+    magazineItems.forEach(item => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 420;
+      canvas.height = 570;
+      const context = canvas.getContext('2d');
+      context.fillStyle = item.background;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = item.foreground;
+      context.textAlign = 'center';
+      context.font = 'bold 68px sans-serif';
+      context.fillText('POPEYE', 210, 105);
+      context.fillRect(55, 135, 310, 3);
+      context.font = 'bold 24px sans-serif';
+      context.fillText(item.coverText, 210, 290);
+      const coverMat = new THREE.MeshStandardMaterial({
+        map: new THREE.CanvasTexture(canvas),
+        roughness: 0.55,
+        metalness: 0.02
+      });
+      const shopItem = {
+        itemId: item.itemId,
+        itemType: 'book',
+        titleEn: item.titleEn,
+        subtitleKo: item.subtitleKo,
+        author: '',
+        cover: canvas.toDataURL('image/png')
+      };
+      new THREE.TextureLoader().load(item.cover, texture => {
+        if (THREE.SRGBColorSpace !== undefined) {
+          texture.colorSpace = THREE.SRGBColorSpace;
+        } else if (THREE.sRGBEncoding !== undefined) {
+          texture.encoding = THREE.sRGBEncoding;
+        }
+        coverMat.map = texture;
+        coverMat.needsUpdate = true;
+        shopItem.cover = item.cover;
+      }, undefined, error => {
+        console.warn('Magazine cover could not be loaded:', item.cover, error);
+      });
+      const magazineMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.57, 0.022),
+        [book6PaperMat, book6PaperMat, book6PaperMat, book6PaperMat, coverMat, book6PaperMat]
+      );
+      magazineMesh.position.set(
+        entryX - item.offset,
+        railShelves[4].y + 0.019 + Math.cos(book6Tilt) * 0.285 + Math.sin(book6Tilt) * 0.011,
+        rightWallZ + 0.14
+      );
+      magazineMesh.rotation.x = -book6Tilt;
+      magazineMesh.userData.shopItem = shopItem;
+      staticShadowCasters.push(magazineMesh);
+      clickables.push(magazineMesh);
+      shopGroup.add(magazineMesh);
+    });
+
     // 선반 뒤쪽 미니멀 티셔츠 행거 2조 배치
     const steelMat = new THREE.MeshStandardMaterial({ color: 0x16171a, roughness: 0.35, metalness: 0.8 });
     function applyTeePrintImage(material, baseName) {

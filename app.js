@@ -114,6 +114,18 @@
       titleEn: 'Sound of Tokyo',
       subtitleKo: 'Tokyo Guidebook',
       author: 'Tokyo Guidebook'
+    }),
+    "magazine-1": createDefaultBookDetails({
+      cover: 'media/magazine_1.jpg',
+      titleEn: 'POPEYE Issue 953 — The Work I Do Now',
+      subtitleKo: '뽀빠이 매거진 953호',
+      author: ''
+    }),
+    "magazine-2": createDefaultBookDetails({
+      cover: 'media/magazine_2.jpg',
+      titleEn: 'POPEYE Magazine — Archive Issue 02',
+      subtitleKo: '뽀빠이 매거진 아카이브 02',
+      author: ''
     })
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
