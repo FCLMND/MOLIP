@@ -215,10 +215,8 @@
         return link;
       }));
     }
-    if (purchaseActionFooter) purchaseActionFooter.hidden = purchaseLinks.length === 0;
-    if (affiliateNotice) {
-      affiliateNotice.hidden = !purchaseLinks.some(link => /aladin\.co\.kr|aladin\.kr|ttb/i.test(link.url));
-    }
+    if (purchaseActionFooter) purchaseActionFooter.hidden = false;
+    if (affiliateNotice) affiliateNotice.hidden = false;
   }
   function setBookDetailPage(pageIndex) {
     activeBookPage = Math.max(0, Math.min(1, pageIndex));
