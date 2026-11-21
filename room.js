@@ -2285,7 +2285,7 @@ window.ArchiveShop = {
       bumpScale: 0.014,
       color: 0xffe6c6,
       emissive: 0xffb366,
-      emissiveIntensity: 1.15,
+      emissiveIntensity: 0.92,
       roughness: 0.9,
       side: THREE.DoubleSide
     });
@@ -2302,7 +2302,7 @@ window.ArchiveShop = {
     const hanjiLanternCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 2.55, 6), hanjiCordMat);
     hanjiLanternCord.position.y = (1.05 + shopH - 1.5) / 2;
     hanjiLantern.add(hanjiLanternCord);
-    const hanjiLanternLight = new THREE.PointLight(0xffb86c, 2.2, 5.5, 1.5);
+    const hanjiLanternLight = new THREE.PointLight(0xffb86c, 1.76, 5.5, 1.5);
     hanjiLanternLight.position.y = 0.02;
     hanjiLantern.add(hanjiLanternLight);
     hanjiLantern.position.set(cornerX, 1.5, rightWallZ + 0.60);
