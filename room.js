@@ -861,7 +861,7 @@ window.ArchiveShop = {
     doorFrameGroup.add(rightPost);
 
     const lintelMat = darkBeamMat.clone();
-    lintelMat.roughness = 0.75;
+    lintelMat.roughness = 0.8;
     const lintel = new THREE.Mesh(new THREE.BoxGeometry(frameThick, shopH - doorH - 0.004, shopD - 0.18), lintelMat);
     lintel.position.set(entryX - 0.004, doorH + (shopH - doorH + 0.004) / 2, entryZ);
     doorFrameGroup.add(lintel);
@@ -874,6 +874,12 @@ window.ArchiveShop = {
     const sideBlock2 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), darkBeamMat);
     sideBlock2.position.set(entryX, doorH / 2, entryZ + 1.30 + sidePanelWidth / 2);
     doorFrameGroup.add(sideBlock2);
+
+    [leftPost, rightPost, lintel, sideBlock1, sideBlock2].forEach(panel => {
+      panel.position.x -= 0.008;
+    });
+    lintel.scale.y = (shopH - doorH - 0.004 - 0.008) / (shopH - doorH - 0.004);
+    lintel.position.y -= 0.004;
 
     const shojiDoor = new THREE.Group();
     const doorW = 1.15, shojiH = doorH - 0.35;
