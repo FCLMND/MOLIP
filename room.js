@@ -1537,6 +1537,7 @@ window.ArchiveShop = {
       { itemId: 'nocturne-study', img: 'lp4', cover: '', title: 'NOCTURNE STUDY', sub: 'Minimal Piano & Modular (LP)', artist: '', bg: '#231f20', accent: '#93c5fd', desc: '깊은 새벽 사색과 독서를 위해 작곡된 미니멀 피아노 음반입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }] }
     ];
     const displayXOffsets = [1.9, 2.6, 3.3, 4.0, 4.7];
+    const lpSize = 0.36;
     [2.02].forEach(y => displayXOffsets.forEach((offset, index) => {
       const item = { ...vinylItems[index % vinylItems.length], x: entryX - offset, y };
       const lpGroup = new THREE.Group();
@@ -1546,7 +1547,7 @@ window.ArchiveShop = {
       });
       applyCoverImage(sleeveMat, item.img);
 
-      const sleeve = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.36, 0.014), sleeveMat);
+      const sleeve = new THREE.Mesh(new THREE.BoxGeometry(lpSize, lpSize, 0.014), sleeveMat);
       staticShadowCasters.push(sleeve);
       lpGroup.add(sleeve);
 
@@ -1770,9 +1771,14 @@ window.ArchiveShop = {
     };
     clickables.push(book6Mesh);
 
+    const magazineWidth = lpSize * 0.67;
+    const magazineHeight = lpSize * 0.90;
+    const magazineDepth = 0.016;
+    const magazineShelfMinX = entryX - railShelves[4].offset - railShelves[4].width / 2;
+    const magazineFirstX = magazineShelfMinX + 0.05 + magazineWidth / 2;
     const magazineItems = [
-      { itemId: 'magazine-1', offset: 4.77, cover: 'media/magazine_1.jpg', titleEn: 'POPEYE Issue 953 — The Work I Do Now', subtitleKo: '뽀빠이 매거진 953호', coverText: 'THE WORK I DO NOW', background: '#f1ecdf', foreground: '#355444' },
-      { itemId: 'magazine-2', offset: 4.30, cover: 'media/magazine_2.jpg', titleEn: 'POPEYE Magazine — Archive Issue 02', subtitleKo: '뽀빠이 매거진 아카이브 02', coverText: 'ARCHIVE ISSUE 02', background: '#355444', foreground: '#f1ecdf' }
+      { itemId: 'magazine-1', offset: entryX - magazineFirstX, cover: 'media/magazine_1.jpg', titleEn: 'POPEYE Issue 953 — The Work I Do Now', subtitleKo: '뽀빠이 매거진 953호', coverText: 'THE WORK I DO NOW', background: '#f1ecdf', foreground: '#355444' },
+      { itemId: 'magazine-2', offset: entryX - (magazineFirstX + magazineWidth + 0.05), cover: 'media/magazine_2.jpg', titleEn: 'POPEYE Magazine — Archive Issue 02', subtitleKo: '뽀빠이 매거진 아카이브 02', coverText: 'ARCHIVE ISSUE 02', background: '#355444', foreground: '#f1ecdf' }
     ];
     magazineItems.forEach(item => {
       const canvas = document.createElement('canvas');
@@ -1814,12 +1820,12 @@ window.ArchiveShop = {
         console.warn('Magazine cover could not be loaded:', item.cover, error);
       });
       const magazineMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(0.42, 0.57, 0.022),
+        new THREE.BoxGeometry(magazineWidth, magazineHeight, magazineDepth),
         [book6PaperMat, book6PaperMat, book6PaperMat, book6PaperMat, coverMat, book6PaperMat]
       );
       magazineMesh.position.set(
         entryX - item.offset,
-        railShelves[4].y + 0.019 + Math.cos(book6Tilt) * 0.285 + Math.sin(book6Tilt) * 0.011,
+        railShelves[4].y + 0.019 + Math.cos(book6Tilt) * magazineHeight / 2 + Math.sin(book6Tilt) * magazineDepth / 2,
         rightWallZ + 0.14
       );
       magazineMesh.rotation.x = -book6Tilt;
