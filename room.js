@@ -1628,21 +1628,38 @@ window.ArchiveShop = {
     });
     const crateSleeveSideMat = new THREE.MeshStandardMaterial({ color: 0xaaa090, roughness: 0.9 });
     const crateLabels = ['AMBIENT', 'ELECTRONIC', 'JAZZ', 'FIELD REC'];
-    const crateCoverColors = ['#415355', '#514a61', '#725746', '#45584c'];
-    const crateCoverMaterials = crateLabels.map((label, index) => {
+    const crateCoverColors = ['#343330', '#8a7057', '#47413a', '#b09a7d'];
+    const crateCoverMaterials = crateCoverColors.map(color => {
       const canvas = document.createElement('canvas');
       canvas.width = 256;
       canvas.height = 256;
       const context = canvas.getContext('2d');
-      context.fillStyle = crateCoverColors[index];
+      context.fillStyle = color;
       context.fillRect(0, 0, 256, 256);
-      context.fillStyle = '#e8dfd0';
-      context.fillRect(25, 30, 206, 3);
-      context.font = 'bold 22px sans-serif';
-      context.fillText(label, 25, 67);
-      context.fillStyle = 'rgba(232, 223, 208, 0.25)';
-      context.fillRect(25, 100, 206, 112);
+      context.fillStyle = 'rgba(232, 223, 208, 0.32)';
+      context.fillRect(24, 24, 208, 2);
+      context.fillRect(24, 216, 208, 2);
       return new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.65 });
+    });
+    const crateCoverLoader = new THREE.TextureLoader();
+    const crateFrontCoverMaterials = Array.from({ length: 9 }, (_, column) => {
+      const material = new THREE.MeshStandardMaterial({
+        map: crateCoverMaterials[column % 4].map,
+        roughness: 0.65
+      });
+      const path = `media/vinyl_${column + 1}.jpg`;
+      crateCoverLoader.load(path, texture => {
+        if (THREE.SRGBColorSpace !== undefined) {
+          texture.colorSpace = THREE.SRGBColorSpace;
+        } else if (THREE.sRGBEncoding !== undefined) {
+          texture.encoding = THREE.sRGBEncoding;
+        }
+        material.map = texture;
+        material.needsUpdate = true;
+      }, undefined, error => {
+        console.warn('Vinyl cover could not be loaded:', path, error);
+      });
+      return material;
     });
     const crateTabMaterials = crateLabels.map(label => {
       const canvas = document.createElement('canvas');
@@ -1662,19 +1679,23 @@ window.ArchiveShop = {
       const x = crateMinX + crateWallThickness + crateCellWidth / 2 + column * (crateCellWidth + crateDividerThickness);
       for (let row = 0; row < 2; row++) {
         const rowDepth = crateInnerDepth / 2;
-        const z = crateMinZ + crateWallThickness + rowDepth * (row + 0.5);
+        const z = crateMaxZ - crateWallThickness - rowDepth * (row + 0.5);
         addCrateBox(crateCellWidth - 0.018, 0.35, rowDepth - 0.04, x, 0.63, z - 0.02, [
           crateSleeveSideMat, crateSleeveSideMat, crateSleeveTopMat,
           crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat
         ]);
-        const cover = addCrateBox(0.36, 0.36, 0.012, x, 0.98 - Math.cos(0.08) * 0.18 - Math.sin(0.08) * 0.006,
+        const coverSize = row === 0 ? 0.35 : 0.36;
+        const coverTop = row === 0 ? 0.86 : 0.98;
+        const cover = addCrateBox(coverSize, coverSize, 0.012, x, coverTop - Math.cos(0.08) * coverSize / 2 - Math.sin(0.08) * 0.006,
           z + rowDepth / 2 - 0.022, [
             crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat,
-            crateSleeveSideMat, crateCoverMaterials[column % 4], crateSleeveSideMat
+            crateSleeveSideMat, row === 0 ? crateFrontCoverMaterials[column] : crateCoverMaterials[column % 4], crateSleeveSideMat
           ]);
         cover.rotation.x = -0.08;
-        const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), crateTabMaterials[column % 4]);
-        tab.position.set(x - crateCellWidth / 2 + 0.14, 0.89, z + rowDepth / 2);
+      }
+      if (column % 2 === 0 && column < 8) {
+        const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), crateTabMaterials[column / 2]);
+        tab.position.set(x, 0.89, crateCenterZ);
         crateGroup.add(tab);
       }
     }
