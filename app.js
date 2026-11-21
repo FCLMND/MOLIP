@@ -41,7 +41,7 @@
       "purchaseLinks": [
         { "label": "교보문고 · Kyobo", "url": "https://ebook-product.kyobobook.co.kr/dig/epd/ebook/E000005450070" },
         { "label": "알라딘 - Aladin", "url": "https://aladin.kr/p/UQHm7" },
-        { "label": "Amazon", "url": "https://a.co/d/0iuUUZeU" }
+        { "label": "Amazon", "url": "https://amzn.to/4ku6KGq" }
       ]
     },
     "berlin-diary": {
