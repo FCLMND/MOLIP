@@ -1638,7 +1638,7 @@ window.ArchiveShop = {
       roughness: 0.9
     });
     const crateSleeveSideMat = new THREE.MeshStandardMaterial({ color: 0xaaa090, roughness: 0.9 });
-    const crateLabels = ['AMBIENT', 'ELECTRONIC', 'JAZZ', 'FIELD REC'];
+    const crateLabels = ['AMBIENT', 'ELECTRONIC', 'TECHNO', 'DEEP HOUSE'];
     const crateCoverColors = ['#343330', '#8a7057', '#47413a', '#b09a7d'];
     const crateCoverMaterials = crateCoverColors.map(color => {
       const canvas = document.createElement('canvas');
