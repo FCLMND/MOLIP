@@ -1775,10 +1775,11 @@ window.ArchiveShop = {
     const magazineHeight = 0.36;
     const magazineDepth = 0.032;
     const magazineShelfMinX = entryX - railShelves[4].offset - railShelves[4].width / 2;
-    const magazineFirstX = magazineShelfMinX + 0.05 + magazineWidth / 2;
+    const magazineFirstX = entryX - displayXOffsets[displayXOffsets.length - 1];
+    const magazineSecondX = magazineShelfMinX + 0.05 + magazineWidth / 2 + magazineWidth + (0.05 + 0.18) * 2 * 0.8;
     const magazineItems = [
       { itemId: 'magazine-1', offset: entryX - magazineFirstX, cover: 'media/magazine_1.jpg', titleEn: 'POPEYE Issue 953 — The Work I Do Now', subtitleKo: '뽀빠이 매거진 953호', coverText: 'THE WORK I DO NOW', background: '#f1ecdf', foreground: '#355444' },
-      { itemId: 'magazine-2', offset: entryX - (magazineFirstX + magazineWidth + (0.05 + 0.18) * 2 * 0.8), cover: 'media/magazine_2.jpg', titleEn: "TATTOO: Henk Schiffmacher's Private Collection of the Art and Its Makers", subtitleKo: '타투 · 헹크 쉬프마허 컬렉션', author: 'Henk Schiffmacher · Noel Daniel', coverText: 'HENK SCHIFFMACHER', background: '#355444', foreground: '#f1ecdf' }
+      { itemId: 'magazine-2', offset: entryX - magazineSecondX, cover: 'media/magazine_2.jpg', titleEn: "TATTOO: Henk Schiffmacher's Private Collection of the Art and Its Makers", subtitleKo: '타투 · 헹크 쉬프마허 컬렉션', author: 'Henk Schiffmacher · Noel Daniel', coverText: 'HENK SCHIFFMACHER', background: '#355444', foreground: '#f1ecdf' }
     ];
     magazineItems.forEach(item => {
       const canvas = document.createElement('canvas');
