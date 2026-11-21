@@ -1446,13 +1446,20 @@ window.ArchiveShop = {
     shopGroup.add(edgePebbleMesh);
 
     const railLightMat = new THREE.MeshBasicMaterial({ color: 0xffb36b });
-    [1.15, 1.82].forEach(railY => {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.038, 0.09), cedarWoodMat);
-      rail.position.set(entryX - 5.1, railY, rightWallZ + 0.13);
+    [
+      { offset: 3.26, width: 3.64, y: 1.82 },
+      { offset: 6.9, width: 3.46, y: 1.82 },
+      { offset: 3.26, width: 3.64, y: 1.15 },
+      { offset: 6.425, width: 2.6, y: 1.15 }
+    ].forEach(({ offset, width, y }) => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(width, 0.038, 0.09), cedarWoodMat);
+      rail.position.set(entryX - offset, y, rightWallZ + 0.13);
       staticShadowCasters.push(rail);
       shopGroup.add(rail);
-      addRectContactShadow(shopGroup, entryX - 5.1, railY - 0.09, rightWallZ + 0.093, 8.2, 0.22);
+      addRectContactShadow(shopGroup, entryX - offset, y - 0.09, rightWallZ + 0.093, width, 0.22);
+    });
 
+    [1.15, 1.82].forEach(railY => {
       const railLightBar = new THREE.Mesh(new THREE.BoxGeometry(8.2, 0.008, 0.025), railLightMat);
       railLightBar.position.set(entryX - 5.1, railY - 0.022, rightWallZ + 0.14);
       shopGroup.add(railLightBar);
