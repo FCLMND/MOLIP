@@ -860,12 +860,8 @@ window.ArchiveShop = {
     rightPost.position.set(entryX, doorH / 2, entryZ - 1.24);
     doorFrameGroup.add(rightPost);
 
-    const lintelMat = new THREE.MeshStandardMaterial({
-      color: 0x2b170b,
-      roughness: 0.8,
-      metalness: 0.02,
-      envMapIntensity: 0.3
-    });
+    const lintelMat = darkBeamMat.clone();
+    lintelMat.roughness = 0.8;
     const lintel = new THREE.Mesh(new THREE.BoxGeometry(frameThick, shopH - doorH - 0.004, shopD - 0.18), lintelMat);
     lintel.position.set(entryX - 0.004, doorH + (shopH - doorH + 0.004) / 2, entryZ);
     doorFrameGroup.add(lintel);
