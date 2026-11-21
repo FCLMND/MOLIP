@@ -2240,6 +2240,182 @@ window.ArchiveShop = {
       louverGroup.add(slat);
     }
 
+    const cornerX = startX + (endX - startX) * (43.5 / 45);
+    const hanjiFiberCanvas = document.createElement('canvas');
+    hanjiFiberCanvas.width = 512;
+    hanjiFiberCanvas.height = 512;
+    const hanjiFiberContext = hanjiFiberCanvas.getContext('2d');
+    hanjiFiberContext.fillStyle = '#f1dfbf';
+    hanjiFiberContext.fillRect(0, 0, 512, 512);
+    let hanjiFiberSeed = 0x48414e4a;
+    const hanjiFiberRandom = () => {
+      hanjiFiberSeed = (hanjiFiberSeed * 1664525 + 1013904223) >>> 0;
+      return hanjiFiberSeed / 4294967296;
+    };
+    for (let i = 0; i < 1400; i++) {
+      const x = hanjiFiberRandom() * 512;
+      const y = hanjiFiberRandom() * 512;
+      hanjiFiberContext.strokeStyle = i % 2 ? 'rgba(125, 91, 56, 0.10)' : 'rgba(255, 250, 230, 0.28)';
+      hanjiFiberContext.lineWidth = 0.5 + hanjiFiberRandom();
+      hanjiFiberContext.beginPath();
+      hanjiFiberContext.moveTo(x, y);
+      hanjiFiberContext.lineTo(x + (hanjiFiberRandom() - 0.5) * 18, y + 3 + hanjiFiberRandom() * 14);
+      hanjiFiberContext.stroke();
+    }
+    for (let y = 8; y < 512; y += 14) {
+      hanjiFiberContext.fillStyle = 'rgba(118, 79, 45, 0.28)';
+      hanjiFiberContext.fillRect(0, y, 512, 2);
+      hanjiFiberContext.fillStyle = 'rgba(255, 247, 221, 0.35)';
+      hanjiFiberContext.fillRect(0, y + 2, 512, 1);
+    }
+    const hanjiFiberTexture = new THREE.CanvasTexture(hanjiFiberCanvas);
+    const hanjiLanternMat = new THREE.MeshStandardMaterial({
+      map: hanjiFiberTexture,
+      bumpMap: hanjiFiberTexture,
+      bumpScale: 0.014,
+      color: 0xffe6c6,
+      emissive: 0xffb366,
+      emissiveIntensity: 1.15,
+      roughness: 0.9,
+      side: THREE.DoubleSide
+    });
+    const hanjiLanternProfile = [];
+    for (let i = 0; i <= 16; i++) {
+      const t = i / 16;
+      hanjiLanternProfile.push(new THREE.Vector2(0.20 + 0.275 * Math.pow(Math.sin(Math.PI * t), 0.65), t * 1.05));
+    }
+    const hanjiLantern = new THREE.Group();
+    hanjiLantern.name = 'hanjiLantern';
+    const hanjiLanternShade = new THREE.Mesh(new THREE.LatheGeometry(hanjiLanternProfile, 32), hanjiLanternMat);
+    hanjiLantern.add(hanjiLanternShade);
+    const hanjiCordMat = new THREE.MeshStandardMaterial({ color: 0x201c19, roughness: 0.85 });
+    const hanjiLanternCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 2.65, 6), hanjiCordMat);
+    hanjiLanternCord.position.y = (1.05 + shopH - 1.6) / 2;
+    hanjiLantern.add(hanjiLanternCord);
+    hanjiLantern.position.set(cornerX, 1.6, rightWallZ + 0.60);
+    shopGroup.add(hanjiLantern);
+
+    const hanjiFishCanvas = document.createElement('canvas');
+    hanjiFishCanvas.width = 1024;
+    hanjiFishCanvas.height = 1024;
+    const hanjiFishContext = hanjiFishCanvas.getContext('2d');
+    hanjiFishContext.fillStyle = '#e8d8ba';
+    hanjiFishContext.fillRect(0, 0, 1024, 1024);
+    for (let i = 0; i < 1800; i++) {
+      hanjiFishContext.strokeStyle = i % 2 ? 'rgba(94, 72, 53, 0.10)' : 'rgba(255, 250, 232, 0.28)';
+      hanjiFishContext.lineWidth = 1;
+      const x = hanjiFiberRandom() * 1024;
+      const y = hanjiFiberRandom() * 1024;
+      hanjiFishContext.beginPath();
+      hanjiFishContext.moveTo(x, y);
+      hanjiFishContext.lineTo(x + (hanjiFiberRandom() - 0.5) * 24, y + 4 + hanjiFiberRandom() * 18);
+      hanjiFishContext.stroke();
+    }
+    const hanjiFishScaleColors = ['#242b2c', '#a57724', '#49697e'];
+    for (let row = 0; row < 14; row++) {
+      for (let column = -1; column < 13; column++) {
+        const x = column * 90 + (row % 2) * 45;
+        const y = 250 + row * 42;
+        hanjiFishContext.fillStyle = hanjiFishScaleColors[(row * 7 + column + 14) % hanjiFishScaleColors.length];
+        hanjiFishContext.globalAlpha = 0.68;
+        hanjiFishContext.beginPath();
+        hanjiFishContext.ellipse(x, y, 42, 27, 0, 0, Math.PI);
+        hanjiFishContext.fill();
+        hanjiFishContext.globalAlpha = 0.9;
+        hanjiFishContext.strokeStyle = '#49443b';
+        hanjiFishContext.lineWidth = 2;
+        hanjiFishContext.stroke();
+      }
+    }
+    hanjiFishContext.globalAlpha = 1;
+    [385, 639].forEach(x => {
+      hanjiFishContext.fillStyle = '#c9aa70';
+      hanjiFishContext.beginPath();
+      hanjiFishContext.arc(x, 135, 32, 0, Math.PI * 2);
+      hanjiFishContext.fill();
+      hanjiFishContext.fillStyle = '#292c2c';
+      hanjiFishContext.beginPath();
+      hanjiFishContext.arc(x, 135, 16, 0, Math.PI * 2);
+      hanjiFishContext.fill();
+      hanjiFishContext.fillStyle = '#f6edda';
+      hanjiFishContext.beginPath();
+      hanjiFishContext.arc(x - 5, 129, 5, 0, Math.PI * 2);
+      hanjiFishContext.fill();
+    });
+    hanjiFishContext.strokeStyle = '#88734e';
+    hanjiFishContext.lineWidth = 5;
+    [235, 789].forEach(x => {
+      hanjiFishContext.beginPath();
+      hanjiFishContext.moveTo(x, 280);
+      hanjiFishContext.quadraticCurveTo(x + (x < 512 ? -90 : 90), 380, x, 500);
+      hanjiFishContext.stroke();
+    });
+    const hanjiFishTexture = new THREE.CanvasTexture(hanjiFishCanvas);
+    const hanjiFishMat = new THREE.MeshStandardMaterial({
+      map: hanjiFishTexture,
+      color: 0xffffff,
+      emissive: 0xffcfa0,
+      emissiveIntensity: 0.35,
+      roughness: 0.95,
+      side: THREE.DoubleSide
+    });
+    const hanjiFish = new THREE.Group();
+    hanjiFish.name = 'hanjiFish';
+    const hanjiFishProfile = [
+      [2.08, 0.07], [2.23, 0.12], [2.42, 0.20], [2.68, 0.28],
+      [2.98, 0.35], [3.28, 0.37], [3.55, 0.34], [3.76, 0.27],
+      [3.92, 0.18], [4.00, 0.10]
+    ];
+    const hanjiFishPositions = [];
+    const hanjiFishUvs = [];
+    const hanjiFishIndices = [];
+    const hanjiFishSegments = 16;
+    hanjiFishProfile.forEach(([y, radius], row) => {
+      for (let i = 0; i <= hanjiFishSegments; i++) {
+        const angle = i / hanjiFishSegments * Math.PI * 2;
+        hanjiFishPositions.push(-Math.cos(angle) * radius * 0.14, y, Math.sin(angle) * radius);
+        hanjiFishUvs.push(i / hanjiFishSegments, (y - 1.85) / 2.15);
+        if (row > 0 && i < hanjiFishSegments) {
+          const a = (row - 1) * (hanjiFishSegments + 1) + i;
+          const b = row * (hanjiFishSegments + 1) + i;
+          hanjiFishIndices.push(a, b, a + 1, b, b + 1, a + 1);
+        }
+      }
+    });
+    const hanjiFishGeometry = new THREE.BufferGeometry();
+    hanjiFishGeometry.setAttribute('position', new THREE.Float32BufferAttribute(hanjiFishPositions, 3));
+    hanjiFishGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(hanjiFishUvs, 2));
+    hanjiFishGeometry.setIndex(hanjiFishIndices);
+    hanjiFishGeometry.computeVertexNormals();
+    hanjiFish.add(new THREE.Mesh(hanjiFishGeometry, hanjiFishMat));
+    const hanjiFinGeometry = new THREE.BufferGeometry();
+    hanjiFinGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
+      0.01, 3.12, -0.26, 0.01, 2.94, -0.37, 0.01, 2.64, -0.23,
+      0.01, 3.12, 0.26, 0.01, 2.64, 0.23, 0.01, 2.94, 0.37
+    ], 3));
+    hanjiFinGeometry.setAttribute('uv', new THREE.Float32BufferAttribute([
+      0.25, 0.59, 0.12, 0.51, 0.25, 0.37,
+      0.75, 0.59, 0.75, 0.37, 0.88, 0.51
+    ], 2));
+    hanjiFinGeometry.computeVertexNormals();
+    hanjiFish.add(new THREE.Mesh(hanjiFinGeometry, hanjiFishMat));
+    const hanjiTailGeometry = new THREE.BufferGeometry();
+    hanjiTailGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
+      0.01, 2.22, 0, 0.01, 1.85, -0.27, 0.01, 1.96, 0,
+      0.01, 2.22, 0, 0.01, 1.96, 0, 0.01, 1.85, 0.27
+    ], 3));
+    hanjiTailGeometry.setAttribute('uv', new THREE.Float32BufferAttribute([
+      0.5, 0.172, 0.23, 0, 0.5, 0.051,
+      0.5, 0.172, 0.5, 0.051, 0.77, 0
+    ], 2));
+    hanjiTailGeometry.computeVertexNormals();
+    hanjiFish.add(new THREE.Mesh(hanjiTailGeometry, hanjiFishMat));
+    const hanjiFishCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 4.0, 6), hanjiCordMat);
+    hanjiFishCord.position.y = (shopH + 4.0) / 2;
+    hanjiFish.add(hanjiFishCord);
+    hanjiFish.position.set(cornerX, 0, leftWallZ - 0.50);
+    shopGroup.add(hanjiFish);
+
     shopGroup.traverse(object => {
       if (object.isMesh) {
         object.castShadow = false;
