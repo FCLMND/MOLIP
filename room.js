@@ -860,8 +860,10 @@ window.ArchiveShop = {
     rightPost.position.set(entryX, doorH / 2, entryZ - 1.24);
     doorFrameGroup.add(rightPost);
 
-    const lintel = new THREE.Mesh(new THREE.BoxGeometry(frameThick, shopH - doorH, shopD - 0.18), darkBeamMat);
-    lintel.position.set(entryX, doorH + (shopH - doorH) / 2, entryZ);
+    const lintelMat = darkBeamMat.clone();
+    lintelMat.roughness = 0.75;
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(frameThick, shopH - doorH - 0.004, shopD - 0.18), lintelMat);
+    lintel.position.set(entryX - 0.004, doorH + (shopH - doorH + 0.004) / 2, entryZ);
     doorFrameGroup.add(lintel);
 
     const sidePanelWidth = shopD / 2 - 0.09 - 1.24 - 0.06;
