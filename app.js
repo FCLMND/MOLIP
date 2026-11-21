@@ -145,6 +145,23 @@
         { label: '교보문고 · Kyobo', url: 'http://app.ac/RAVg9E543' },
         { label: '예스24 · YES24', url: '' }
       ]
+    },
+    "magazine-3": {
+      ...createDefaultBookDetails({
+        cover: 'media/magazine_3.jpg',
+        titleEn: 'Synthesizer Evolution: From Analogue to Digital (And Back)',
+        subtitleKo: '신시사이저 에볼루션: 아날로그에서 디지털로, 그리고 다시 아날로그로',
+        author: 'Oli Freke · Velocity Press'
+      }),
+      curationNoteKo: "소리는 보이지 않지만, 그 소리를 빚어내는 악기의 도면에는 시대의 미학이 선명히 새겨져 있습니다.\n\n올리 프리크(Oli Freke)가 정밀한 일러스트로 기록한 이 아카이브 북은 초기 아날로그 모듈러의 거대한 패치 케이블부터 디지털 시대를 거쳐 다시 따뜻한 아날로그 회귀에 이르기까지, 전자음악의 질감을 만들어 온 신시사이저의 연대기를 한눈에 펼쳐 보입니다.\n\n노브를 돌리고 전류를 흘려보내며 우연한 배음을 마주하던 엔지니어와 음악가들의 흔적. 리스닝룸의 공간을 채우는 깊은 앰비언트 사운드가 어떤 기계적 사유와 손끝의 감각에서 태어났는지, 푸른 청사진 같은 페이지를 넘기며 천천히 따라가 보시기 바랍니다.",
+      curationNoteEn: "Sound is invisible, yet the blueprints of the instruments that shape it carry the unmistakable aesthetics of their era.\n\nIllustrated with meticulous precision by Oli Freke, this visual archive traces the lineage of electronic sound—from early analogue modular systems and tangled patch cables, through the digital revolution, and back to the warmth of tactile hardware.\n\nA quiet tribute to the engineers and musicians who sculpted electricity into emotion. As ambient frequencies fill the listening room, turn through these blueprint-like pages to explore the mechanical philosophy behind the sound.",
+      tocKo: "• 1960s–1970s: 초기 아날로그 모듈러 및 개척기 (Moog, Buchla, EMS, ARP)\n• 1980s: 폴리포닉의 부상과 디지털 FM 사운드의 혁명 (Prophet-5, Jupiter-8, DX7)\n• 1990s–2000s: 버추얼 아날로그와 그루브박스·샘플러의 시대\n• 2010s–Present: 아날로그 회귀와 유로랙 모듈러의 부활\n• 수록 내용: 시대별 대표 신시사이저 120여 종의 정밀 일러스트 도면 및 타임라인",
+      tocEn: "• 1960s–1970s: Early Analogue Modular & Pioneers (Moog, Buchla, EMS, ARP)\n• 1980s: The Polyphonic Rise & Digital FM Revolution (Prophet-5, Jupiter-8, DX7)\n• 1990s–2000s: Virtual Analogue, Grooveboxes & Samplers\n• 2010s–Present: The Analogue Revival & Eurorack Renaissance\n• Features: Detailed illustrations of over 120 iconic synthesizers and historical timeline",
+      purchaseLinks: [
+        { label: '교보문고 · Kyobo', url: '' },
+        { label: '알라딘 · Aladin', url: '' },
+        { label: 'Amazon · Global', url: '' }
+      ]
     }
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
