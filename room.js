@@ -1695,14 +1695,16 @@ window.ArchiveShop = {
           crateSleeveSideMat, crateSleeveSideMat, crateSleeveTopMat,
           crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat
         ]);
-        const coverSize = row === 0 ? 0.35 : 0.36;
-        const coverTop = row === 0 ? 0.86 : 0.98;
-        const cover = addCrateBox(coverSize, coverSize, 0.012, x, coverTop - Math.cos(0.08) * coverSize / 2 - Math.sin(0.08) * 0.006,
-          z + rowDepth / 2 - 0.022, [
-            crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat,
-            crateSleeveSideMat, row === 0 ? crateFrontCoverMaterials[column] : crateCoverMaterials[column % 4], crateSleeveSideMat
-          ]);
-        cover.rotation.x = -0.08;
+        if (row === 0 || (column % 2 === 0 && column < 8)) {
+          const coverSize = row === 0 ? 0.35 : 0.36;
+          const coverTop = row === 0 ? 0.86 : 0.98;
+          const cover = addCrateBox(coverSize, coverSize, 0.012, x, coverTop - Math.cos(0.08) * coverSize / 2 - Math.sin(0.08) * 0.006,
+            z + rowDepth / 2 - 0.022, [
+              crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat,
+              crateSleeveSideMat, row === 0 ? crateFrontCoverMaterials[column] : crateCoverMaterials[column % 4], crateSleeveSideMat
+            ]);
+          cover.rotation.x = -0.08;
+        }
       }
       if (column % 2 === 0 && column < 8) {
         const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), crateTabMaterials[column / 2]);
