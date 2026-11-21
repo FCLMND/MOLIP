@@ -1449,16 +1449,17 @@ window.ArchiveShop = {
     const TOTAL_MIN_X = entryX - 8.58;
     const TOTAL_MAX_X = entryX - 1.49;
     const GAP = 0.19;
-    const coffeeShelfWidth = 1.87;
     const guideShelfWidth = 0.51;
-    const guideShelfMinX = TOTAL_MIN_X + coffeeShelfWidth + GAP;
+    const guideShelfCenterX = entryX - 5.85;
+    const guideShelfMinX = guideShelfCenterX - guideShelfWidth / 2;
+    const coffeeShelfWidth = (guideShelfMinX - GAP) - TOTAL_MIN_X;
     const bookShelfMaxX = entryX - 5.22;
     const railShelves = [
       { minX: TOTAL_MIN_X, maxX: bookShelfMaxX, y: 1.82 },
       { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.82 },
       { minX: TOTAL_MIN_X, maxX: TOTAL_MIN_X + coffeeShelfWidth, y: 1.15 },
       { minX: guideShelfMinX, maxX: guideShelfMinX + guideShelfWidth, y: 1.15 },
-      { minX: guideShelfMinX + guideShelfWidth + GAP, maxX: TOTAL_MAX_X, y: 1.15 }
+      { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.15 }
     ].map(({ minX, maxX, y }) => ({
       offset: entryX - (minX + maxX) / 2, width: maxX - minX, y
     }));
