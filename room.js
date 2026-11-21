@@ -1343,7 +1343,7 @@ window.ArchiveShop = {
     const crateMaxX = crateCenterX + crateWidth / 2;
     const crateMinZ = rightWallZ + 0.09;
     const crateMaxZ = crateMinZ + crateDepth;
-    const crateLegXs = [crateMinX + 0.035, crateCenterX, crateMaxX - 0.035];
+    const crateLegXs = [crateMinX + 0.035, crateMaxX - 0.035];
     const crateLegZs = [crateMinZ + 0.035, crateMaxZ - 0.035];
 
     const edgePebbleCount = 850;
@@ -1578,32 +1578,36 @@ window.ArchiveShop = {
     crateLegXs.forEach(x => crateLegZs.forEach(z => {
       staticShadowCasters.push(addCrateBox(0.04, 0.43, 0.04, x, 0.215, z, crateSteelMat));
     }));
-    crateLegZs.forEach(z => {
-      addCrateBox(crateWidth - 0.07, 0.035, 0.035, crateCenterX, 0.09, z, crateSteelMat);
-    });
-    crateLegXs.forEach(x => {
-      addCrateBox(0.035, 0.035, crateDepth - 0.07, x, 0.09, (crateMinZ + crateMaxZ) / 2, crateSteelMat);
-    });
-
     const crateWallThickness = 0.025;
-    const crateDividerThickness = 0.018;
+    const crateDividerThickness = 0.014;
     const crateInnerWidth = crateWidth - crateWallThickness * 2;
     const crateInnerDepth = crateDepth - crateWallThickness * 2;
-    const crateCellWidth = (crateInnerWidth - crateDividerThickness * 3) / 4;
-    const crateCellDepth = (crateInnerDepth - crateDividerThickness) / 2;
+    const crateCellWidth = (crateInnerWidth - crateDividerThickness * 8) / 9;
     const crateCenterZ = (crateMinZ + crateMaxZ) / 2;
     staticShadowCasters.push(addCrateBox(crateWidth, crateWallThickness, crateDepth, crateCenterX, 0.43 + crateWallThickness / 2, crateCenterZ, crateWoodMat));
-    [crateMinZ + crateWallThickness / 2, crateMaxZ - crateWallThickness / 2].forEach(z => {
-      staticShadowCasters.push(addCrateBox(crateWidth, 0.43, crateWallThickness, crateCenterX, 0.645, z, crateWoodMat));
-    });
-    [crateMinX + crateWallThickness / 2, crateMaxX - crateWallThickness / 2].forEach(x => {
-      staticShadowCasters.push(addCrateBox(crateWallThickness, 0.43, crateInnerDepth, x, 0.645, crateCenterZ, crateWoodMat));
-    });
-    for (let i = 1; i < 4; i++) {
-      const x = crateMinX + crateWallThickness + crateCellWidth * i + crateDividerThickness * (i - 0.5);
-      addCrateBox(crateDividerThickness, 0.405, crateInnerDepth, x, 0.6575, crateCenterZ, crateWoodMat);
+    staticShadowCasters.push(addCrateBox(crateWidth, 0.43, crateWallThickness, crateCenterX, 0.645, crateMinZ + crateWallThickness / 2, crateWoodMat));
+    staticShadowCasters.push(addCrateBox(crateWidth, 0.22, crateWallThickness, crateCenterX, 0.54, crateMaxZ - crateWallThickness / 2, crateWoodMat));
+    function addCrateSlope(x, frontZ, depth, bottomY, backHeight, frontHeight, thickness) {
+      const shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(depth, 0);
+      shape.lineTo(depth, backHeight);
+      shape.lineTo(0, frontHeight);
+      shape.closePath();
+      const mesh = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: thickness, bevelEnabled: false }), crateWoodMat);
+      mesh.rotation.y = Math.PI / 2;
+      mesh.position.set(x, bottomY, frontZ);
+      crateGroup.add(mesh);
+      return mesh;
     }
-    addCrateBox(crateInnerWidth, 0.405, crateDividerThickness, crateCenterX, 0.6575, crateCenterZ, crateWoodMat);
+    [crateMinX, crateMaxX - crateWallThickness].forEach(x => {
+      staticShadowCasters.push(addCrateSlope(x, crateMaxZ, crateDepth, 0.43, 0.43, 0.22, crateWallThickness));
+    });
+    for (let i = 1; i < 9; i++) {
+      const x = crateMinX + crateWallThickness + crateCellWidth * i + crateDividerThickness * (i - 0.5);
+      addCrateSlope(x - crateDividerThickness / 2, crateMaxZ - crateWallThickness, crateInnerDepth,
+        0.43 + crateWallThickness, 0.405, 0.20, crateDividerThickness);
+    }
 
     const crateSleeveCanvas = document.createElement('canvas');
     crateSleeveCanvas.width = 2048;
@@ -1654,22 +1658,23 @@ window.ArchiveShop = {
       context.fillText(label, 128, 32);
       return new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.8, side: THREE.DoubleSide });
     });
-    for (let column = 0; column < 4; column++) {
+    for (let column = 0; column < 9; column++) {
       const x = crateMinX + crateWallThickness + crateCellWidth / 2 + column * (crateCellWidth + crateDividerThickness);
       for (let row = 0; row < 2; row++) {
-        const z = crateMinZ + crateWallThickness + crateCellDepth / 2 + row * (crateCellDepth + crateDividerThickness);
-        addCrateBox(crateCellWidth - 0.025, 0.35, crateCellDepth - 0.025, x, 0.63, z, [
+        const rowDepth = crateInnerDepth / 2;
+        const z = crateMinZ + crateWallThickness + rowDepth * (row + 0.5);
+        addCrateBox(crateCellWidth - 0.018, 0.35, rowDepth - 0.04, x, 0.63, z - 0.02, [
           crateSleeveSideMat, crateSleeveSideMat, crateSleeveTopMat,
           crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat
         ]);
         const cover = addCrateBox(0.36, 0.36, 0.012, x, 0.98 - Math.cos(0.08) * 0.18 - Math.sin(0.08) * 0.006,
-          z + crateCellDepth / 2 - 0.075, [
+          z + rowDepth / 2 - 0.022, [
             crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat,
-            crateSleeveSideMat, crateCoverMaterials[column], crateSleeveSideMat
+            crateSleeveSideMat, crateCoverMaterials[column % 4], crateSleeveSideMat
           ]);
         cover.rotation.x = -0.08;
-        const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), crateTabMaterials[column]);
-        tab.position.set(x - crateCellWidth / 2 + 0.14, 0.89, z + crateCellDepth / 2 - 0.015);
+        const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), crateTabMaterials[column % 4]);
+        tab.position.set(x - crateCellWidth / 2 + 0.14, 0.89, z + rowDepth / 2);
         crateGroup.add(tab);
       }
     }
