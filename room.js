@@ -867,11 +867,11 @@ window.ArchiveShop = {
     doorFrameGroup.add(lintel);
 
     const sidePanelWidth = shopD / 2 - 0.09 - 1.24 - 0.06;
-    const sideBlock1 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), darkBeamMat);
+    const sideBlock1 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), lintelMat);
     sideBlock1.position.set(entryX, doorH / 2, entryZ - 1.30 - sidePanelWidth / 2);
     doorFrameGroup.add(sideBlock1);
 
-    const sideBlock2 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), darkBeamMat);
+    const sideBlock2 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), lintelMat);
     sideBlock2.position.set(entryX, doorH / 2, entryZ + 1.30 + sidePanelWidth / 2);
     doorFrameGroup.add(sideBlock2);
 
@@ -899,6 +899,27 @@ window.ArchiveShop = {
     }
     shojiDoor.position.set(entryX - 0.04, shojiH / 2, entryZ - 0.78);
     doorFrameGroup.add(shojiDoor);
+
+    const topRailBottom = shojiDoor.position.y + shojiH / 2 - 0.003;
+    const topRailTop = doorH + 0.004 + 0.003;
+    const topRail = new THREE.Mesh(new THREE.BoxGeometry(frameThick, topRailTop - topRailBottom, 2 * (1.24 - 0.06)), lintelMat);
+    topRail.position.set(lintel.position.x + 0.003, (topRailTop + topRailBottom) / 2, entryZ);
+    doorFrameGroup.add(topRail);
+
+    [sideBlock1, sideBlock2, lintel, topRail].forEach(panel => {
+      const positions = panel.geometry.attributes.position;
+      const normals = panel.geometry.attributes.normal;
+      const uv = panel.geometry.attributes.uv;
+      for (let i = 0; i < positions.count; i++) {
+        if (Math.abs(normals.getX(i)) > 0.5) {
+          uv.setXY(i,
+            (entryZ + shopD / 2 - 0.09 - panel.position.z - positions.getZ(i)) / (shopD - 0.18),
+            (panel.position.y + positions.getY(i) * panel.scale.y) / shopH
+          );
+        }
+      }
+      uv.needsUpdate = true;
+    });
 
     scene.add(doorFrameGroup);
 
