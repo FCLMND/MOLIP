@@ -216,7 +216,7 @@
       }));
     }
     if (purchaseActionFooter) purchaseActionFooter.hidden = false;
-    if (affiliateNotice) affiliateNotice.hidden = false;
+    if (affiliateNotice) affiliateNotice.hidden = bookDetails.itemType !== 'book';
   }
   function setBookDetailPage(pageIndex) {
     activeBookPage = Math.max(0, Math.min(1, pageIndex));
