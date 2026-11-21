@@ -1518,7 +1518,7 @@ window.ArchiveShop = {
       tryIdx(0);
     }
 
-    // 선반 앞쪽 절반: 음반(LP) 2개 층 진열 (./media/lp1.jpeg ~ lp4.jpeg 순환 적용)
+    // 선반 앞쪽 절반: 음반(LP) 상단 진열 (./media/lp1.jpeg ~ lp4.jpeg 순환 적용)
     const vinylItems = [
       { itemId: 'sanctuary-vol-01', img: 'lp1', cover: 'media/lp1.jpg', title: 'SANCTUARY VOL.01', sub: 'Ambient & Field Recordings (LP)', artist: '', bg: '#1c1d21', accent: '#d97736', desc: '리스닝룸의 밤과 공간 잔향을 담은 바이닐 에디션입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }, { label: 'Spotify 스트리밍', url: 'https://spotify.com' }] },
       { itemId: 'stillness-in-wood', img: 'lp2', cover: 'media/lp2.jpg', title: 'STILLNESS IN WOOD', sub: 'Electro-Acoustic Sessions (LP)', artist: '', bg: '#2b1810', accent: '#e0a96d', desc: '진공관 앰프와 원목 디퓨저의 울림을 녹음한 180g LP입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }, { label: 'Apple Music 스트리밍', url: 'https://apple.com' }] },
@@ -1526,7 +1526,7 @@ window.ArchiveShop = {
       { itemId: 'nocturne-study', img: 'lp4', cover: '', title: 'NOCTURNE STUDY', sub: 'Minimal Piano & Modular (LP)', artist: '', bg: '#231f20', accent: '#93c5fd', desc: '깊은 새벽 사색과 독서를 위해 작곡된 미니멀 피아노 음반입니다.', links: [{ label: 'Bandcamp 음반 듣기 / 구매', url: 'https://bandcamp.com' }] }
     ];
     const displayXOffsets = [1.9, 2.6, 3.3, 4.0, 4.7];
-    [2.02, 1.35].forEach(y => displayXOffsets.forEach((offset, index) => {
+    [2.02].forEach(y => displayXOffsets.forEach((offset, index) => {
       const item = { ...vinylItems[index % vinylItems.length], x: entryX - offset, y };
       const lpGroup = new THREE.Group();
       const sleeveMat = new THREE.MeshStandardMaterial({
