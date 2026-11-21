@@ -1319,6 +1319,33 @@ window.ArchiveShop = {
     rightWall.receiveShadow = true;
     shopGroup.add(rightWall);
 
+    const TOTAL_MIN_X = entryX - 8.58;
+    const TOTAL_MAX_X = entryX - 1.49;
+    const GAP = 0.19;
+    const guideShelfWidth = 0.51;
+    const guideShelfCenterX = entryX - 5.85;
+    const guideShelfMinX = guideShelfCenterX - guideShelfWidth / 2;
+    const coffeeShelfWidth = (guideShelfMinX - GAP) - TOTAL_MIN_X;
+    const bookShelfMaxX = entryX - 5.22;
+    const railShelves = [
+      { minX: TOTAL_MIN_X, maxX: bookShelfMaxX, y: 1.82 },
+      { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.82 },
+      { minX: TOTAL_MIN_X, maxX: TOTAL_MIN_X + coffeeShelfWidth, y: 1.15 },
+      { minX: guideShelfMinX, maxX: guideShelfMinX + guideShelfWidth, y: 1.15 },
+      { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.15 }
+    ].map(({ minX, maxX, y }) => ({
+      offset: entryX - (minX + maxX) / 2, width: maxX - minX, y
+    }));
+    const crateWidth = railShelves[4].width;
+    const crateCenterX = entryX - railShelves[4].offset;
+    const crateDepth = 0.78;
+    const crateMinX = crateCenterX - crateWidth / 2;
+    const crateMaxX = crateCenterX + crateWidth / 2;
+    const crateMinZ = rightWallZ + 0.09;
+    const crateMaxZ = crateMinZ + crateDepth;
+    const crateLegXs = [crateMinX + 0.035, crateCenterX, crateMaxX - 0.035];
+    const crateLegZs = [crateMinZ + 0.035, crateMaxZ - 0.035];
+
     const edgePebbleCount = 850;
     const boundaryPebblesPerWall = 180;
     const floorPebblesPerLane = 240;
@@ -1440,29 +1467,79 @@ window.ArchiveShop = {
     if (!entranceLayoutFound) console.error('Unable to place all entrance pebbles within the safe walkway bounds.');
     entrancePebbleCenters.forEach(({ x, z }) => placeEdgePebble(x, z, true));
 
+    if (pebbleIndex !== edgePebbleCount) throw new Error('Unable to place all archive shop pebbles.');
+    const pebblePosition = new THREE.Vector3();
+    const pebbleRotation = new THREE.Quaternion();
+    const pebbleScale = new THREE.Vector3();
+    const pebblePositions = [];
+    for (let i = 0; i < pebbleIndex; i++) {
+      edgePebbleMesh.getMatrixAt(i, pebbleCheckMatrix);
+      pebbleCheckMatrix.decompose(pebblePosition, pebbleRotation, pebbleScale);
+      pebblePositions.push({
+        index: i,
+        x: pebblePosition.x,
+        z: pebblePosition.z,
+        radius: Math.max(pebbleScale.x, pebbleScale.y, pebbleScale.z)
+      });
+    }
+    function overlapsCrate(pebble) {
+      if (pebble.x + pebble.radius >= crateMinX && pebble.x - pebble.radius <= crateMaxX &&
+          pebble.z + pebble.radius >= crateMinZ && pebble.z - pebble.radius <= crateMaxZ) return true;
+      return crateLegXs.some(x => crateLegZs.some(z =>
+        Math.hypot(pebble.x - x, pebble.z - z) < 0.14 + pebble.radius
+      ));
+    }
+    const relocatedPebbles = pebblePositions.filter(overlapsCrate);
+    const retainedPebbles = pebblePositions.filter(pebble => !overlapsCrate(pebble));
+    const pebbleGridSize = 0.22;
+    const pebbleGrid = new Map();
+    function addPebbleToGrid(pebble) {
+      const key = `${Math.floor(pebble.x / pebbleGridSize)},${Math.floor(pebble.z / pebbleGridSize)}`;
+      if (!pebbleGrid.has(key)) pebbleGrid.set(key, []);
+      pebbleGrid.get(key).push(pebble);
+    }
+    function overlapsPebbles(pebble) {
+      const gridX = Math.floor(pebble.x / pebbleGridSize);
+      const gridZ = Math.floor(pebble.z / pebbleGridSize);
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          const nearby = pebbleGrid.get(`${gridX + dx},${gridZ + dz}`) || [];
+          if (nearby.some(other =>
+            Math.hypot(pebble.x - other.x, pebble.z - other.z) < pebble.radius + other.radius + 0.002
+          )) return true;
+        }
+      }
+      return false;
+    }
+    retainedPebbles.forEach(addPebbleToGrid);
+    relocatedPebbles.forEach(pebble => {
+      let candidate = null;
+      for (let attempt = 0; attempt < 30000; attempt++) {
+        const minX = attempt < 1000 ? Math.max(pebbleMinX + pebbleFootprint, crateMinX - 2) : pebbleMinX + pebbleFootprint;
+        const maxX = attempt < 1000 ? Math.min(pebbleMaxX - pebbleFootprint, crateMaxX + 2) : pebbleMaxX - pebbleFootprint;
+        const x = minX + pebbleRandom() * (maxX - minX);
+        const z = rightWallZ + 0.09 + pebbleFootprint +
+          pebbleRandom() * (deckMinZ - pebbleFootprint - (rightWallZ + 0.09 + pebbleFootprint));
+        const next = { ...pebble, x, z };
+        if (overlapsCrate(next)) continue;
+        if (overlapsPebbles(next)) continue;
+        candidate = next;
+        break;
+      }
+      if (!candidate) throw new Error('Unable to relocate archive shop pebbles around the vinyl crate.');
+      edgePebbleMesh.getMatrixAt(pebble.index, pebbleCheckMatrix);
+      pebbleCheckMatrix.elements[12] = candidate.x;
+      pebbleCheckMatrix.elements[14] = candidate.z;
+      edgePebbleMesh.setMatrixAt(pebble.index, pebbleCheckMatrix);
+      addPebbleToGrid(candidate);
+    });
+
     edgePebbleMesh.instanceMatrix.needsUpdate = true;
     edgePebbleMesh.instanceColor.needsUpdate = true;
     edgePebbleMesh.castShadow = false;
     shopGroup.add(edgePebbleMesh);
 
     const railLightMat = new THREE.MeshBasicMaterial({ color: 0xffb36b });
-    const TOTAL_MIN_X = entryX - 8.58;
-    const TOTAL_MAX_X = entryX - 1.49;
-    const GAP = 0.19;
-    const guideShelfWidth = 0.51;
-    const guideShelfCenterX = entryX - 5.85;
-    const guideShelfMinX = guideShelfCenterX - guideShelfWidth / 2;
-    const coffeeShelfWidth = (guideShelfMinX - GAP) - TOTAL_MIN_X;
-    const bookShelfMaxX = entryX - 5.22;
-    const railShelves = [
-      { minX: TOTAL_MIN_X, maxX: bookShelfMaxX, y: 1.82 },
-      { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.82 },
-      { minX: TOTAL_MIN_X, maxX: TOTAL_MIN_X + coffeeShelfWidth, y: 1.15 },
-      { minX: guideShelfMinX, maxX: guideShelfMinX + guideShelfWidth, y: 1.15 },
-      { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.15 }
-    ].map(({ minX, maxX, y }) => ({
-      offset: entryX - (minX + maxX) / 2, width: maxX - minX, y
-    }));
     railShelves.forEach(({ offset, width, y }) => {
       const rail = new THREE.Mesh(new THREE.BoxGeometry(width, 0.038, 0.09), cedarWoodMat);
       rail.position.set(entryX - offset, y, rightWallZ + 0.13);
@@ -1481,6 +1558,122 @@ window.ArchiveShop = {
     railLight.position.set(entryX - 5.4, 2.35, rightWallZ + 1.8);
     railLight.castShadow = false;
     shopGroup.add(railLight);
+
+    const crateGroup = new THREE.Group();
+    const crateWoodMat = new THREE.MeshStandardMaterial({
+      map: tex.mkWood('#3a2418', '#1d100b'),
+      roughness: 0.7
+    });
+    const crateSteelMat = new THREE.MeshStandardMaterial({
+      color: 0x18181b,
+      roughness: 0.8,
+      metalness: 0.65
+    });
+    function addCrateBox(width, height, depth, x, y, z, material) {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), material);
+      mesh.position.set(x, y, z);
+      crateGroup.add(mesh);
+      return mesh;
+    }
+    crateLegXs.forEach(x => crateLegZs.forEach(z => {
+      staticShadowCasters.push(addCrateBox(0.04, 0.43, 0.04, x, 0.215, z, crateSteelMat));
+    }));
+    crateLegZs.forEach(z => {
+      addCrateBox(crateWidth - 0.07, 0.035, 0.035, crateCenterX, 0.09, z, crateSteelMat);
+    });
+    crateLegXs.forEach(x => {
+      addCrateBox(0.035, 0.035, crateDepth - 0.07, x, 0.09, (crateMinZ + crateMaxZ) / 2, crateSteelMat);
+    });
+
+    const crateWallThickness = 0.025;
+    const crateDividerThickness = 0.018;
+    const crateInnerWidth = crateWidth - crateWallThickness * 2;
+    const crateInnerDepth = crateDepth - crateWallThickness * 2;
+    const crateCellWidth = (crateInnerWidth - crateDividerThickness * 3) / 4;
+    const crateCellDepth = (crateInnerDepth - crateDividerThickness) / 2;
+    const crateCenterZ = (crateMinZ + crateMaxZ) / 2;
+    staticShadowCasters.push(addCrateBox(crateWidth, crateWallThickness, crateDepth, crateCenterX, 0.43 + crateWallThickness / 2, crateCenterZ, crateWoodMat));
+    [crateMinZ + crateWallThickness / 2, crateMaxZ - crateWallThickness / 2].forEach(z => {
+      staticShadowCasters.push(addCrateBox(crateWidth, 0.43, crateWallThickness, crateCenterX, 0.645, z, crateWoodMat));
+    });
+    [crateMinX + crateWallThickness / 2, crateMaxX - crateWallThickness / 2].forEach(x => {
+      staticShadowCasters.push(addCrateBox(crateWallThickness, 0.43, crateInnerDepth, x, 0.645, crateCenterZ, crateWoodMat));
+    });
+    for (let i = 1; i < 4; i++) {
+      const x = crateMinX + crateWallThickness + crateCellWidth * i + crateDividerThickness * (i - 0.5);
+      addCrateBox(crateDividerThickness, 0.405, crateInnerDepth, x, 0.6575, crateCenterZ, crateWoodMat);
+    }
+    addCrateBox(crateInnerWidth, 0.405, crateDividerThickness, crateCenterX, 0.6575, crateCenterZ, crateWoodMat);
+
+    const crateSleeveCanvas = document.createElement('canvas');
+    crateSleeveCanvas.width = 2048;
+    crateSleeveCanvas.height = 512;
+    const crateSleeveContext = crateSleeveCanvas.getContext('2d');
+    const crateSleeveColors = ['#d4c8ad', '#443d39', '#886d58', '#bbb2a4', '#53635c', '#9c806e', '#e3d6c3', '#343b44'];
+    for (let x = 0, i = 0; x < crateSleeveCanvas.width; i++) {
+      const width = 4 + (i * 7 % 8);
+      crateSleeveContext.fillStyle = crateSleeveColors[(i * 5 + Math.floor(i / 11)) % crateSleeveColors.length];
+      crateSleeveContext.fillRect(x, 0, width, crateSleeveCanvas.height);
+      crateSleeveContext.fillStyle = i % 3 === 0 ? '#efe6d6' : '#b4aa9d';
+      crateSleeveContext.fillRect(x, 0, 1, crateSleeveCanvas.height);
+      x += width;
+    }
+    const crateSleeveTopMat = new THREE.MeshStandardMaterial({
+      map: new THREE.CanvasTexture(crateSleeveCanvas),
+      roughness: 0.9
+    });
+    const crateSleeveSideMat = new THREE.MeshStandardMaterial({ color: 0xaaa090, roughness: 0.9 });
+    const crateLabels = ['AMBIENT', 'ELECTRONIC', 'JAZZ', 'FIELD REC'];
+    const crateCoverColors = ['#415355', '#514a61', '#725746', '#45584c'];
+    const crateCoverMaterials = crateLabels.map((label, index) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const context = canvas.getContext('2d');
+      context.fillStyle = crateCoverColors[index];
+      context.fillRect(0, 0, 256, 256);
+      context.fillStyle = '#e8dfd0';
+      context.fillRect(25, 30, 206, 3);
+      context.font = 'bold 22px sans-serif';
+      context.fillText(label, 25, 67);
+      context.fillStyle = 'rgba(232, 223, 208, 0.25)';
+      context.fillRect(25, 100, 206, 112);
+      return new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.65 });
+    });
+    const crateTabMaterials = crateLabels.map(label => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 64;
+      const context = canvas.getContext('2d');
+      context.fillStyle = '#e6ded0';
+      context.fillRect(0, 0, 256, 64);
+      context.fillStyle = '#292722';
+      context.font = 'bold 25px sans-serif';
+      context.textAlign = 'center';
+      context.textBaseline = 'middle';
+      context.fillText(label, 128, 32);
+      return new THREE.MeshStandardMaterial({ map: new THREE.CanvasTexture(canvas), roughness: 0.8, side: THREE.DoubleSide });
+    });
+    for (let column = 0; column < 4; column++) {
+      const x = crateMinX + crateWallThickness + crateCellWidth / 2 + column * (crateCellWidth + crateDividerThickness);
+      for (let row = 0; row < 2; row++) {
+        const z = crateMinZ + crateWallThickness + crateCellDepth / 2 + row * (crateCellDepth + crateDividerThickness);
+        addCrateBox(crateCellWidth - 0.025, 0.35, crateCellDepth - 0.025, x, 0.63, z, [
+          crateSleeveSideMat, crateSleeveSideMat, crateSleeveTopMat,
+          crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat
+        ]);
+        const cover = addCrateBox(0.36, 0.36, 0.012, x, 0.98 - Math.cos(0.08) * 0.18 - Math.sin(0.08) * 0.006,
+          z + crateCellDepth / 2 - 0.075, [
+            crateSleeveSideMat, crateSleeveSideMat, crateSleeveSideMat,
+            crateSleeveSideMat, crateCoverMaterials[column], crateSleeveSideMat
+          ]);
+        cover.rotation.x = -0.08;
+        const tab = new THREE.Mesh(new THREE.PlaneGeometry(0.24, 0.06), crateTabMaterials[column]);
+        tab.position.set(x - crateCellWidth / 2 + 0.14, 0.89, z + crateCellDepth / 2 - 0.015);
+        crateGroup.add(tab);
+      }
+    }
+    shopGroup.add(crateGroup);
 
     function createDisplayCoverTex(title, sub, bgHex, accentHex, isBook) {
       const c = document.createElement('canvas'); c.width = 256; c.height = 256;
