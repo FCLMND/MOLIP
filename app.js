@@ -115,12 +115,21 @@
       subtitleKo: 'Tokyo Guidebook',
       author: 'Tokyo Guidebook'
     }),
-    "magazine-1": createDefaultBookDetails({
-      cover: 'media/magazine_1.jpg',
-      titleEn: 'POPEYE Issue 953 — The Work I Do Now',
-      subtitleKo: '뽀빠이 매거진 953호',
-      author: ''
-    }),
+    "magazine-1": {
+      ...createDefaultBookDetails({
+        cover: 'media/magazine_1.jpg',
+        titleEn: 'POPEYE Issue 953 — The Work I Do Now',
+        subtitleKo: '뽀빠이 매거진 953호',
+        author: ''
+      }),
+      curationNoteKo: "POPEYE Magazine\n\nISSUE 953 · September 2026\n\nTHE WORK I DO NOW — 이것이 내가 하는 일\n\n이번 호의 주제는 '일'이다.\n\n정답이 없기에 고민하고, 그렇기에 일에 대해 진지하게 생각해 보자는 메시지를 담고 있다.\n\n각자의 방식으로 일하고 살아가는 사람들의 모습과 그들이 생각하는 일의 의미를 조명한다.\n\n\nこれが僕の仕事。 (이것이 내가 하는 일.)\n\nTHE WORK I DO NOW\n\n正解がないから迷う。だから、仕事のことを本気で考えよう。\n(정답이 없기에 망설인다. 그렇기에 일에 대해 진지하게 생각해 보자.)",
+      curationNoteEn: "The theme of this issue is 'Work'.\n\nIt begins with the idea that there are no definitive answers when it comes to work. That uncertainty invites us to think more seriously about what we do and why we do it.\n\nThrough different perspectives and ways of working, this issue explores the meaning of work in our everyday lives.\n\n\n\n- これが僕の仕事。 / THE WORK I DO NOW\n- 正解がないから迷う。だから、仕事のことを本気で考えよう。\n- We hesitate because there are no right answers. That's why we should think seriously about work.",
+      purchaseLinks: [
+        { label: '아마존 - Amazon', url: 'https://link.amazon/B0cb71vEq' },
+        { label: '교보문고 · Kyobo', url: 'http://app.ac/SAVg9i523' },
+        { label: '예스24 · YES24', url: '' }
+      ]
+    },
     "magazine-2": createDefaultBookDetails({
       cover: 'media/magazine_2.jpg',
       titleEn: 'POPEYE Magazine — Archive Issue 02',
