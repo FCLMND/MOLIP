@@ -1446,12 +1446,22 @@ window.ArchiveShop = {
     shopGroup.add(edgePebbleMesh);
 
     const railLightMat = new THREE.MeshBasicMaterial({ color: 0xffb36b });
+    const TOTAL_MIN_X = entryX - 8.58;
+    const TOTAL_MAX_X = entryX - 1.49;
+    const GAP = 0.19;
+    const coffeeShelfWidth = 1.87;
+    const guideShelfWidth = 0.51;
+    const guideShelfMinX = TOTAL_MIN_X + coffeeShelfWidth + GAP;
+    const bookShelfMaxX = entryX - 5.22;
     const railShelves = [
-      { offset: 3.26, width: 3.54, y: 1.82 },
-      { offset: 6.9, width: 3.36, y: 1.82 },
-      { offset: 3.26, width: 3.54, y: 1.15 },
-      { offset: 6.45, width: 2.55, y: 1.15 }
-    ];
+      { minX: TOTAL_MIN_X, maxX: bookShelfMaxX, y: 1.82 },
+      { minX: bookShelfMaxX + GAP, maxX: TOTAL_MAX_X, y: 1.82 },
+      { minX: TOTAL_MIN_X, maxX: TOTAL_MIN_X + coffeeShelfWidth, y: 1.15 },
+      { minX: guideShelfMinX, maxX: guideShelfMinX + guideShelfWidth, y: 1.15 },
+      { minX: guideShelfMinX + guideShelfWidth + GAP, maxX: TOTAL_MAX_X, y: 1.15 }
+    ].map(({ minX, maxX, y }) => ({
+      offset: entryX - (minX + maxX) / 2, width: maxX - minX, y
+    }));
     railShelves.forEach(({ offset, width, y }) => {
       const rail = new THREE.Mesh(new THREE.BoxGeometry(width, 0.038, 0.09), cedarWoodMat);
       rail.position.set(entryX - offset, y, rightWallZ + 0.13);
@@ -1582,7 +1592,7 @@ window.ArchiveShop = {
       { id: 'berlin-diary', itemId: 'berlin-diary', itemType: 'book', cover: 'media/book5.png', titleEn: 'Berlin Diary', subtitleKo: '베를린 일기', author: '최민석 · Choi Min-seok', img: 'book5', title: '베를린 일기', sub: '최민석 · 여행 에세이', bg: '#eaa6bb', accent: '#2d2930', desc: '베를린에서의 일상과 여행을 담은 최민석의 에세이입니다.', links: [{ label: '🇰🇷 한국어 전자책 (교보문고)', url: 'https://kyobobook.co.kr' }, { label: '🇺🇸 English eBook (Amazon Kindle)', url: 'https://amazon.com' }] }
     ];
     const bookXOffsets = [5.5, 6.2, 6.9, 7.6, 8.3];
-    const coffeeXOffsets = [6.16, 6.58, 7.00, 7.42];
+    const coffeeXOffsets = [0, 2, 1, 3].map(index => entryX - (TOTAL_MIN_X + 0.305 + index * 0.42));
     const coffeeItems = [
       { color: 0xf2f0eb, title: 'MOLIP COFFEE — WHITE BLEND', subtitle: '스페셜티 원두 · 화이트 블렌드', description: '상품 준비중입니다.\nThis item is currently being prepared.', links: [] },
       { color: 0x18191c, title: 'MOLIP COFFEE — DARK ROAST', subtitle: '스페셜티 원두 · 다크 로스트', description: '상품 준비중입니다.\nThis item is currently being prepared.', links: [] },
@@ -1728,7 +1738,7 @@ window.ArchiveShop = {
     const book6PaperMat = new THREE.MeshStandardMaterial({ color: 0xede6d8, roughness: 0.90 });
     const book6Tilt = 0.08;
     const book6ShelfTopY = 1.17;
-    const book6X = entryX - (4.7 + 6.16) / 2;
+    const book6X = guideShelfMinX + guideShelfWidth / 2;
     const book6Mesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.21, 0.30, 0.022),
       [
