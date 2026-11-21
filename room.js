@@ -1610,17 +1610,28 @@ window.ArchiveShop = {
     }
 
     const crateSleeveCanvas = document.createElement('canvas');
-    crateSleeveCanvas.width = 2048;
-    crateSleeveCanvas.height = 512;
+    crateSleeveCanvas.width = 512;
+    crateSleeveCanvas.height = 2048;
     const crateSleeveContext = crateSleeveCanvas.getContext('2d');
     const crateSleeveColors = ['#d4c8ad', '#443d39', '#886d58', '#bbb2a4', '#53635c', '#9c806e', '#e3d6c3', '#343b44'];
-    for (let x = 0, i = 0; x < crateSleeveCanvas.width; i++) {
-      const width = 4 + (i * 7 % 8);
-      crateSleeveContext.fillStyle = crateSleeveColors[(i * 5 + Math.floor(i / 11)) % crateSleeveColors.length];
-      crateSleeveContext.fillRect(x, 0, width, crateSleeveCanvas.height);
+    const crateSleeveAccentColors = ['#f2efe9', '#1f1f22', '#e6c35c', '#d8c7a8'];
+    const crateSleeveLineColors = Array.from({ length: 256 }, (_, i) =>
+      i < 128
+        ? crateSleeveColors[(i * 5 + Math.floor(i / 11)) % crateSleeveColors.length]
+        : crateSleeveAccentColors[Math.floor((i - 128) / 32)]
+    );
+    let crateSleeveSeed = 0x56494e59;
+    for (let i = crateSleeveLineColors.length - 1; i > 0; i--) {
+      crateSleeveSeed = (crateSleeveSeed * 1664525 + 1013904223) >>> 0;
+      const j = Math.floor(crateSleeveSeed / 4294967296 * (i + 1));
+      [crateSleeveLineColors[i], crateSleeveLineColors[j]] = [crateSleeveLineColors[j], crateSleeveLineColors[i]];
+    }
+    for (let i = 0; i < crateSleeveLineColors.length; i++) {
+      const y = i * 8;
+      crateSleeveContext.fillStyle = crateSleeveLineColors[i];
+      crateSleeveContext.fillRect(0, y, crateSleeveCanvas.width, 8);
       crateSleeveContext.fillStyle = i % 3 === 0 ? '#efe6d6' : '#b4aa9d';
-      crateSleeveContext.fillRect(x, 0, 1, crateSleeveCanvas.height);
-      x += width;
+      crateSleeveContext.fillRect(0, y, crateSleeveCanvas.width, 1);
     }
     const crateSleeveTopMat = new THREE.MeshStandardMaterial({
       map: new THREE.CanvasTexture(crateSleeveCanvas),
