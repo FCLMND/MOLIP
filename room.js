@@ -860,16 +860,17 @@ window.ArchiveShop = {
     rightPost.position.set(entryX, doorH / 2, entryZ - 1.24);
     doorFrameGroup.add(rightPost);
 
-    const lintel = new THREE.Mesh(new THREE.BoxGeometry(frameThick, shopH - doorH + 0.45, shopD), darkBeamMat);
-    lintel.position.set(entryX, doorH + (shopH - doorH) / 2 - 0.15, entryZ);
+    const lintel = new THREE.Mesh(new THREE.BoxGeometry(frameThick, shopH - doorH, shopD - 0.18), darkBeamMat);
+    lintel.position.set(entryX, doorH + (shopH - doorH) / 2, entryZ);
     doorFrameGroup.add(lintel);
 
-    const sideBlock1 = new THREE.Mesh(new THREE.BoxGeometry(0.24, doorH, 2.25), darkBeamMat);
-    sideBlock1.position.set(entryX - 0.05, doorH / 2, entryZ - 2.32);
+    const sidePanelWidth = shopD / 2 - 0.09 - 1.24 - 0.06;
+    const sideBlock1 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), darkBeamMat);
+    sideBlock1.position.set(entryX, doorH / 2, entryZ - 1.30 - sidePanelWidth / 2);
     doorFrameGroup.add(sideBlock1);
 
-    const sideBlock2 = new THREE.Mesh(new THREE.BoxGeometry(0.24, doorH, 2.25), darkBeamMat);
-    sideBlock2.position.set(entryX - 0.05, doorH / 2, entryZ + 2.32);
+    const sideBlock2 = new THREE.Mesh(new THREE.BoxGeometry(frameThick, doorH, sidePanelWidth), darkBeamMat);
+    sideBlock2.position.set(entryX, doorH / 2, entryZ + 1.30 + sidePanelWidth / 2);
     doorFrameGroup.add(sideBlock2);
 
     const shojiDoor = new THREE.Group();
