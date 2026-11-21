@@ -1771,9 +1771,9 @@ window.ArchiveShop = {
     };
     clickables.push(book6Mesh);
 
-    const magazineWidth = lpSize * 0.67;
-    const magazineHeight = lpSize * 0.90;
-    const magazineDepth = 0.016;
+    const magazineWidth = 0.26;
+    const magazineHeight = 0.36;
+    const magazineDepth = 0.032;
     const magazineShelfMinX = entryX - railShelves[4].offset - railShelves[4].width / 2;
     const magazineFirstX = magazineShelfMinX + 0.05 + magazineWidth / 2;
     const magazineItems = [
