@@ -1483,14 +1483,22 @@ window.ArchiveShop = {
       });
     }
     function overlapsCrate(pebble) {
-      if (pebble.x + pebble.radius >= crateMinX && pebble.x - pebble.radius <= crateMaxX &&
-          pebble.z + pebble.radius >= crateMinZ && pebble.z - pebble.radius <= crateMaxZ) return true;
+      return pebble.x + pebble.radius >= crateMinX && pebble.x - pebble.radius <= crateMaxX &&
+        pebble.z + pebble.radius >= crateMinZ && pebble.z - pebble.radius <= crateMaxZ;
+    }
+    function overlapsCrateLeg(pebble) {
       return crateLegXs.some(x => crateLegZs.some(z =>
         Math.hypot(pebble.x - x, pebble.z - z) < 0.14 + pebble.radius
       ));
     }
-    const relocatedPebbles = pebblePositions.filter(overlapsCrate);
-    const retainedPebbles = pebblePositions.filter(pebble => !overlapsCrate(pebble));
+    const cratePebbles = pebblePositions.filter(overlapsCrate);
+    for (let i = cratePebbles.length - 1; i > 0; i--) {
+      const j = Math.floor(pebbleRandom() * (i + 1));
+      [cratePebbles[i], cratePebbles[j]] = [cratePebbles[j], cratePebbles[i]];
+    }
+    const underCratePebbles = new Set(cratePebbles.slice(0, Math.round(cratePebbles.length * 0.3)).map(pebble => pebble.index));
+    const relocatedPebbles = pebblePositions.filter(pebble => overlapsCrate(pebble) || overlapsCrateLeg(pebble));
+    const retainedPebbles = pebblePositions.filter(pebble => !overlapsCrate(pebble) && !overlapsCrateLeg(pebble));
     const pebbleGridSize = 0.22;
     const pebbleGrid = new Map();
     function addPebbleToGrid(pebble) {
@@ -1514,14 +1522,16 @@ window.ArchiveShop = {
     retainedPebbles.forEach(addPebbleToGrid);
     relocatedPebbles.forEach(pebble => {
       let candidate = null;
+      const underCrate = underCratePebbles.has(pebble.index);
       for (let attempt = 0; attempt < 30000; attempt++) {
-        const minX = attempt < 1000 ? Math.max(pebbleMinX + pebbleFootprint, crateMinX - 2) : pebbleMinX + pebbleFootprint;
-        const maxX = attempt < 1000 ? Math.min(pebbleMaxX - pebbleFootprint, crateMaxX + 2) : pebbleMaxX - pebbleFootprint;
+        const minX = underCrate ? crateMinX + pebble.radius : pebbleMinX + pebbleFootprint;
+        const maxX = underCrate ? crateMaxX - pebble.radius : pebbleMaxX - pebbleFootprint;
+        const minZ = underCrate ? crateMinZ + pebble.radius : rightWallZ + 0.09 + pebbleFootprint;
+        const maxZ = underCrate ? crateMaxZ - pebble.radius : deckMinZ - pebbleFootprint;
         const x = minX + pebbleRandom() * (maxX - minX);
-        const z = rightWallZ + 0.09 + pebbleFootprint +
-          pebbleRandom() * (deckMinZ - pebbleFootprint - (rightWallZ + 0.09 + pebbleFootprint));
+        const z = minZ + pebbleRandom() * (maxZ - minZ);
         const next = { ...pebble, x, z };
-        if (overlapsCrate(next)) continue;
+        if (overlapsCrateLeg(next) || (!underCrate && overlapsCrate(next))) continue;
         if (overlapsPebbles(next)) continue;
         candidate = next;
         break;
