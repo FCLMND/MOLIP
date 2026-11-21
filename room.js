@@ -2315,7 +2315,22 @@ window.ArchiveShop = {
       hanjiFishContext.lineTo(x + (hanjiFiberRandom() - 0.5) * 24, y + 4 + hanjiFiberRandom() * 18);
       hanjiFishContext.stroke();
     }
-    const hanjiFishScaleColors = ['#242b2c', '#a57724', '#49697e'];
+    const hanjiFishScaleColors = ['#c93b2b', '#e0533c', '#18181c', '#1d4e89', '#2b6cb0'];
+    for (let i = 0; i < 12; i++) {
+      const x = 280 + hanjiFiberRandom() * 464;
+      const y = 230 + hanjiFiberRandom() * 650;
+      const radius = 70 + hanjiFiberRandom() * 95;
+      const gradient = hanjiFishContext.createRadialGradient(0, 0, 0, 0, 0, radius);
+      gradient.addColorStop(0, hanjiFishScaleColors[i % hanjiFishScaleColors.length]);
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      hanjiFishContext.save();
+      hanjiFishContext.translate(x, y);
+      hanjiFishContext.scale(1, 0.55 + hanjiFiberRandom() * 0.6);
+      hanjiFishContext.globalAlpha = 0.42;
+      hanjiFishContext.fillStyle = gradient;
+      hanjiFishContext.fillRect(-radius, -radius, radius * 2, radius * 2);
+      hanjiFishContext.restore();
+    }
     for (let row = 0; row < 14; row++) {
       for (let column = -1; column < 13; column++) {
         const x = column * 90 + (row % 2) * 45;
@@ -2326,11 +2341,31 @@ window.ArchiveShop = {
         hanjiFishContext.ellipse(x, y, 42, 27, 0, 0, Math.PI);
         hanjiFishContext.fill();
         hanjiFishContext.globalAlpha = 0.9;
-        hanjiFishContext.strokeStyle = '#49443b';
+        hanjiFishContext.strokeStyle = '#18181c';
         hanjiFishContext.lineWidth = 2;
         hanjiFishContext.stroke();
       }
     }
+    [
+      [365, 330, 125, '#c93b2b'], [625, 425, 135, '#1d4e89'],
+      [425, 585, 115, '#18181c'], [650, 680, 125, '#e0533c'],
+      [475, 805, 105, '#2b6cb0']
+    ].forEach(([x, y, radius, color]) => {
+      const gradient = hanjiFishContext.createRadialGradient(0, 0, 0, 0, 0, radius);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      hanjiFishContext.save();
+      hanjiFishContext.translate(x, y);
+      hanjiFishContext.scale(1, 1.35);
+      hanjiFishContext.globalAlpha = 0.75;
+      hanjiFishContext.fillStyle = gradient;
+      hanjiFishContext.beginPath();
+      hanjiFishContext.moveTo(-radius, 0);
+      hanjiFishContext.bezierCurveTo(-radius * 0.9, -radius, radius * 0.6, -radius * 0.8, radius, 0);
+      hanjiFishContext.bezierCurveTo(radius * 0.7, radius * 0.8, -radius * 0.7, radius, -radius, 0);
+      hanjiFishContext.fill();
+      hanjiFishContext.restore();
+    });
     hanjiFishContext.globalAlpha = 1;
     [385, 639].forEach(x => {
       hanjiFishContext.fillStyle = '#c9aa70';
@@ -2346,7 +2381,7 @@ window.ArchiveShop = {
       hanjiFishContext.arc(x - 5, 129, 5, 0, Math.PI * 2);
       hanjiFishContext.fill();
     });
-    hanjiFishContext.strokeStyle = '#88734e';
+    hanjiFishContext.strokeStyle = '#1d4e89';
     hanjiFishContext.lineWidth = 5;
     [235, 789].forEach(x => {
       hanjiFishContext.beginPath();
@@ -2357,6 +2392,7 @@ window.ArchiveShop = {
     const hanjiFishTexture = new THREE.CanvasTexture(hanjiFishCanvas);
     const hanjiFishMat = new THREE.MeshStandardMaterial({
       map: hanjiFishTexture,
+      emissiveMap: hanjiFishTexture,
       color: 0xffffff,
       emissive: 0xffcfa0,
       emissiveIntensity: 0.35,
@@ -2365,6 +2401,10 @@ window.ArchiveShop = {
     });
     const hanjiFish = new THREE.Group();
     hanjiFish.name = 'hanjiFish';
+    const hanjiFishBody = new THREE.Group();
+    hanjiFishBody.scale.setScalar(1.2);
+    hanjiFishBody.position.y = 1.52 - 1.85 * 1.2;
+    hanjiFish.add(hanjiFishBody);
     const hanjiFishProfile = [
       [2.08, 0.07], [2.23, 0.12], [2.42, 0.20], [2.68, 0.28],
       [2.98, 0.35], [3.28, 0.37], [3.55, 0.34], [3.76, 0.27],
@@ -2377,7 +2417,7 @@ window.ArchiveShop = {
     hanjiFishProfile.forEach(([y, radius], row) => {
       for (let i = 0; i <= hanjiFishSegments; i++) {
         const angle = i / hanjiFishSegments * Math.PI * 2;
-        hanjiFishPositions.push(-Math.cos(angle) * radius * 0.14, y, Math.sin(angle) * radius);
+        hanjiFishPositions.push(Math.cos(angle) * radius * 0.14, y, Math.sin(angle) * radius);
         hanjiFishUvs.push(i / hanjiFishSegments, (y - 1.85) / 2.15);
         if (row > 0 && i < hanjiFishSegments) {
           const a = (row - 1) * (hanjiFishSegments + 1) + i;
@@ -2391,7 +2431,7 @@ window.ArchiveShop = {
     hanjiFishGeometry.setAttribute('uv', new THREE.Float32BufferAttribute(hanjiFishUvs, 2));
     hanjiFishGeometry.setIndex(hanjiFishIndices);
     hanjiFishGeometry.computeVertexNormals();
-    hanjiFish.add(new THREE.Mesh(hanjiFishGeometry, hanjiFishMat));
+    hanjiFishBody.add(new THREE.Mesh(hanjiFishGeometry, hanjiFishMat));
     const hanjiFinGeometry = new THREE.BufferGeometry();
     hanjiFinGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
       0.01, 3.12, -0.26, 0.01, 2.94, -0.37, 0.01, 2.64, -0.23,
@@ -2402,7 +2442,7 @@ window.ArchiveShop = {
       0.75, 0.59, 0.75, 0.37, 0.88, 0.51
     ], 2));
     hanjiFinGeometry.computeVertexNormals();
-    hanjiFish.add(new THREE.Mesh(hanjiFinGeometry, hanjiFishMat));
+    hanjiFishBody.add(new THREE.Mesh(hanjiFinGeometry, hanjiFishMat));
     const hanjiTailGeometry = new THREE.BufferGeometry();
     hanjiTailGeometry.setAttribute('position', new THREE.Float32BufferAttribute([
       0.01, 2.22, 0, 0.01, 1.85, -0.27, 0.01, 1.96, 0,
@@ -2413,11 +2453,11 @@ window.ArchiveShop = {
       0.5, 0.172, 0.5, 0.051, 0.77, 0
     ], 2));
     hanjiTailGeometry.computeVertexNormals();
-    hanjiFish.add(new THREE.Mesh(hanjiTailGeometry, hanjiFishMat));
-    const hanjiFishCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 4.0, 6), hanjiCordMat);
-    hanjiFishCord.position.y = (shopH + 4.0) / 2;
+    hanjiFishBody.add(new THREE.Mesh(hanjiTailGeometry, hanjiFishMat));
+    const hanjiFishCord = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.004, shopH - 4.1, 6), hanjiCordMat);
+    hanjiFishCord.position.y = (shopH + 4.1) / 2;
     hanjiFish.add(hanjiFishCord);
-    hanjiFish.position.set(cornerX, 0, leftWallZ - 0.50);
+    hanjiFish.position.set(cornerX, 0, leftWallZ - 0.55);
     shopGroup.add(hanjiFish);
 
     shopGroup.traverse(object => {
