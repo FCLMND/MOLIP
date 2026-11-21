@@ -118,7 +118,7 @@
     "magazine-1": {
       ...createDefaultBookDetails({
         cover: 'media/magazine_1.jpg',
-        titleEn: 'POPEYE Issue 953 — The Work I Do Now',
+        titleEn: 'POPEYE Issue 953 — The Work I Do Now · MONTHLY UPDATE',
         subtitleKo: '뽀빠이 매거진 953호',
         author: ''
       }),
@@ -284,7 +284,7 @@
     bookDetails = { ...bookDetailsById[activeBookId] };
     if (itemMetadata) {
       if (bookId !== 'magazine-2') {
-        bookDetails.titleEn = itemMetadata.titleEn || bookDetails.titleEn;
+        if (bookId !== 'magazine-1') bookDetails.titleEn = itemMetadata.titleEn || bookDetails.titleEn;
         bookDetails.subtitleKo = itemMetadata.subtitleKo || bookDetails.subtitleKo;
         bookDetails.author = itemMetadata.author ?? itemMetadata.artist ?? itemMetadata.subtitle ?? bookDetails.author;
       }
