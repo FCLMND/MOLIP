@@ -1343,7 +1343,7 @@ window.ArchiveShop = {
     const crateMaxX = crateCenterX + crateWidth / 2;
     const crateMinZ = rightWallZ + 0.09;
     const crateMaxZ = crateMinZ + crateDepth;
-    const crateLegXs = [crateMinX + 0.035, crateMaxX - 0.035];
+    const crateLegXs = [crateMinX + 0.035, crateCenterX, crateMaxX - 0.035];
     const crateLegZs = [crateMinZ + 0.035, crateMaxZ - 0.035];
 
     const edgePebbleCount = 850;
