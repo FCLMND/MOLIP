@@ -130,12 +130,22 @@
         { label: '예스24 · YES24', url: '' }
       ]
     },
-    "magazine-2": createDefaultBookDetails({
-      cover: 'media/magazine_2.jpg',
-      titleEn: 'POPEYE Magazine — Archive Issue 02',
-      subtitleKo: '뽀빠이 매거진 아카이브 02',
-      author: ''
-    })
+    "magazine-2": {
+      ...createDefaultBookDetails({
+        cover: 'media/magazine_2.jpg',
+        titleEn: "TATTOO: Henk Schiffmacher's Private Collection of the Art and Its Makers",
+        subtitleKo: '타투 · 헹크 쉬프마허 컬렉션',
+        author: 'Henk Schiffmacher · Noel Daniel'
+      }),
+      curationNoteKo: "TATTOO\nHenk Schiffmacher's Private Collection of the Art and Its Makers\nHenk Schiffmacher & Noel Daniel (Editors) · TASCHEN\n\n세계적인 타투 아티스트 헹크 쉬프마허의 개인 컬렉션을 바탕으로, 타투의 역사와 예술적 표현을 조명하는 아트북이다.\n\n선원과 모험가들의 문화에서 출발한 전통적인 타투 도안부터 다양한 상징과 장식적 이미지까지, 타투가 단순한 신체 장식을 넘어 하나의 독립적인 시각예술로 발전해 온 과정을 보여준다.\n\n오랜 시간 축적된 타투의 미학과 그 안에 담긴 문화적 흔적을 만날 수 있는 책이다.",
+      curationNoteEn: "TATTOO\nHenk Schiffmacher’s Private Collection of the Art and Its Makers\nHenk Schiffmacher & Noel Daniel (Editors) · TASCHEN\n\nA remarkable visual archive of tattoo culture, drawn from the private collection of legendary tattoo artist and historian Henk Schiffmacher.\n\nFeaturing more than 700 images, the book explores over two centuries of tattoo history, from traditional Māori and South Pacific tattoo practices to ancient Asian traditions and the origins of old-school Western tattooing.\n\nBeyond its historical value, it offers a fascinating look at tattooing as a visual art form, preserving the drawings, symbols, tools, and stories of the artists who shaped its evolution from underground culture to mainstream art.",
+      excerptKo: "출판사: TASCHEN\n\n저자: Henk Schiffmacher\n\n편집: Noel Daniel\n\n분량: 440 pages\n\n\n언어: 영어·프랑스어·독일어",
+      purchaseLinks: [
+        { label: '아마존 - Amazon', url: 'https://link.amazon/B0io4PBQR' },
+        { label: '교보문고 · Kyobo', url: 'http://app.ac/RAVg9E543' },
+        { label: '예스24 · YES24', url: '' }
+      ]
+    }
   };
   const BOOK_DETAILS_STORAGE_KEY = 'molip_book_details_v1';
   const BOOK_DETAIL_EDITABLE_FIELDS = [
