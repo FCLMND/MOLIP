@@ -1508,9 +1508,13 @@ let shopZoom = 0.35;
 
   if (aEl) {
     aEl.setAttribute('playsinline', '');
-    window.addEventListener('pointerdown', function startDefaultAudio() {
+    window.addEventListener('pointerdown', function startDefaultAudio(event) {
       if (!introDismissed) return;
       if (isArchiveShopAudioActive()) return;
+      if (event.target instanceof Element && event.target.closest('#pp-btn')) {
+        window.removeEventListener('pointerdown', startDefaultAudio);
+        return;
+      }
       if (aEl.paused && aEl.src) {
         initAudio();
         if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
@@ -1850,7 +1854,8 @@ let shopZoom = 0.35;
     const media = isArchiveShopAudioActive() ? shopAudio : aEl;
     const isPlaying = Boolean(media && !media.paused);
     const isAudible = isPlaying && !media.muted;
-    playbackBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+    playbackBtn.classList.toggle('is-muted', !isAudible);
+    playbackBtn.setAttribute('aria-label', isAudible ? 'Pause' : 'Play');
     const icon = playbackBtn.querySelector('.control-icon path:last-child');
     if (icon) icon.setAttribute('d', isAudible ? 'M16 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12' : 'm17 9 4 6m0-6-4 6');
   }
@@ -1866,7 +1871,7 @@ let shopZoom = 0.35;
     playbackBtn.addEventListener('click', () => {
       if (isArchiveShopAudioActive()) {
         if (!shopAudio) return;
-        if (shopAudio.paused && !shopAudioPlayPending) {
+        if ((shopAudio.paused || shopAudio.muted) && !shopAudioPlayPending) {
           startShopAudioFromUserGesture();
         } else {
           ++shopAudioPlayRequest;
@@ -1879,7 +1884,9 @@ let shopZoom = 0.35;
         return;
       }
       if (!aEl) return;
-      if (aEl.paused) {
+      if (aEl.paused || aEl.muted) {
+        if (mainAudioFadeFrame) clearInterval(mainAudioFadeFrame);
+        mainAudioFadeFrame = 0;
         startRoomAudioFromGesture();
         syncRoomMedia(false);
       } else {

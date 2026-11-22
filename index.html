@@ -208,7 +208,8 @@
     body.native-fullscreen #ui-bar > :not(#fs-btn) { display: none !important; }
     body.native-fullscreen #exit-fs-btn { display: none; }
     #ui-bar .control-icon { display: none; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-    #ui-bar #pp-btn .control-icon { display: block; width: 14px; height: 14px; stroke-width: 1.6; }
+    #ui-bar #pp-btn .control-icon { display: block; width: 23px; height: 23px; stroke-width: 1.75; }
+    #ui-bar #pp-btn.is-muted .control-icon { stroke: #e05252; }
     #ui-bar .button-label {
       display: flex; align-items: center; justify-content: center;
       height: 16px; line-height: 1.2; white-space: nowrap;
@@ -472,7 +473,7 @@
     <input type="file" id="v-up" accept="video/*" style="display: none;" />
     <label class="btn" for="a-up" style="display: none;">Upload Audio</label>
     <input type="file" id="a-up" accept="audio/*" style="display: none;" />
-    <button id="pp-btn" type="button" aria-label="Play">
+    <button id="pp-btn" class="is-muted" type="button" aria-label="Play">
       <svg class="control-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" /><path d="m17 9 4 6m0-6-4 6" /></svg>
     </button>
     <button id="breathe-btn" type="button" aria-label="Breathe">
