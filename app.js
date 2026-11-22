@@ -1126,6 +1126,7 @@ let shopZoom = 0.35;
   document.getElementById('ui-bar').appendChild(shopNavBtn);
 
   function enterArchiveShopDirect() {
+    if (isPlayerInShop()) return;
     if (playerAvatar.bedRef) {
       playerAvatar.bedRef.occupied = false;
       playerAvatar.bedRef = null;
@@ -1163,9 +1164,7 @@ let shopZoom = 0.35;
       enterArchiveShopDirect();
     }
   };
-  ['pointerup', 'touchend', 'click'].forEach(type => {
-    shopNavBtn.addEventListener(type, handleShopNavActivation);
-  });
+  shopNavBtn.addEventListener('click', handleShopNavActivation);
 
   function updateMouseCoords(e) {
     const width = document.documentElement.clientWidth || window.innerWidth;
@@ -1437,7 +1436,7 @@ let shopZoom = 0.35;
     }
   }
   const shopAudio = typeof window.Audio === 'function' ? new window.Audio() : null;
-  const SHOP_AUDIO_VOLUME = 0.48;
+  const SHOP_AUDIO_VOLUME = 0.48 * 0.8;
   const shopAudioPaths = ['./media/shop_sound.mp3'];
   let shopAudioPathIndex = 0;
 
@@ -1613,7 +1612,7 @@ let shopZoom = 0.35;
     document.documentElement.classList.remove('cinema-mode');
     document.body.classList.remove('cinema-mode');
     document.body.classList.add('native-fullscreen');
-    if (fsBtn) setControlLabel(fsBtn, 'Exit Fullscreen');
+    if (fsBtn) setControlLabel(fsBtn, 'immersive');
     if (fsWrap) fsWrap.classList.add('active');
     const activeVisual = isArchiveShopAudioActive() && shopVisual ? shopVisual : vEl;
     if (activeVisual && fsVideo && fsCanvas && activeVisual.src) {
@@ -1629,13 +1628,31 @@ let shopZoom = 0.35;
   }
   function enterCinemaMode() {
     document.body.classList.remove('native-fullscreen');
-    if (fsBtn) setControlLabel(fsBtn, 'Fullscreen');
+    if (fsBtn) setControlLabel(fsBtn, 'immersive');
     if (fsWrap) fsWrap.classList.remove('active');
     if (fsVideo && !fsVideo.paused) fsVideo.pause();
     document.documentElement.classList.add('cinema-mode');
     document.body.classList.add('cinema-mode');
     updateCameraViewport();
     window.scrollTo(0, 1);
+  }
+  function exitImmersiveMode() {
+    document.documentElement.classList.remove('cinema-mode');
+    document.body.classList.remove('cinema-mode');
+    document.body.classList.toggle('native-fullscreen', Boolean(getFullscreenElement()));
+    isFs = false;
+    if (fsWrap) fsWrap.classList.remove('active');
+    if (fsVideo && !fsVideo.paused) fsVideo.pause();
+    if (fsBtn) setControlLabel(fsBtn, 'immersive');
+    scheduleCameraViewportUpdate();
+    window.scrollTo(0, 0);
+  }
+  function toggleImmersiveMode() {
+    if (document.body.classList.contains('cinema-mode')) {
+      exitImmersiveMode();
+    } else {
+      enterCinemaMode();
+    }
   }
   function enterFullscreen() {
     const fullscreenElement = getFullscreenElement();
@@ -1681,7 +1698,7 @@ let shopZoom = 0.35;
       enterCinemaMode();
     }
   }
-  if (fsBtn) fsBtn.addEventListener('click', enterFullscreen);
+  if (fsBtn) fsBtn.addEventListener('click', toggleImmersiveMode);
   function exitFs(exitNativeFullscreen = true) {
     isFs = false;
     document.body.classList.remove('native-fullscreen');
@@ -1689,7 +1706,7 @@ let shopZoom = 0.35;
     document.body.classList.remove('cinema-mode');
     if (fsWrap) fsWrap.classList.remove('active');
     if (fsVideo && !fsVideo.paused) fsVideo.pause();
-    if (fsBtn) setControlLabel(fsBtn, 'Fullscreen');
+    if (fsBtn) setControlLabel(fsBtn, 'immersive');
     if (exitNativeFullscreen && getFullscreenElement()) {
       const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen;
       if (typeof exitFullscreen === 'function') {
@@ -1714,7 +1731,10 @@ let shopZoom = 0.35;
     window.scrollTo(0, 0);
   }
   const exitFsBtn = document.getElementById('exit-fs-btn');
-  if (exitFsBtn) exitFsBtn.addEventListener('click', exitFs);
+  if (exitFsBtn) exitFsBtn.addEventListener('click', () => {
+    if (document.body.classList.contains('cinema-mode')) exitImmersiveMode();
+    else exitFs();
+  });
   function syncFullscreenState() {
     const fullscreenElement = getFullscreenElement();
     if (!fullscreenElement && isSpaceFullscreen) isSpaceFullscreen = false;
@@ -1732,7 +1752,7 @@ let shopZoom = 0.35;
     } else {
       if (!document.body.classList.contains('cinema-mode')) {
         isFs = false;
-        if (fsBtn) setControlLabel(fsBtn, 'Fullscreen');
+        if (fsBtn) setControlLabel(fsBtn, 'immersive');
       }
       scheduleCameraViewportUpdate();
     }
