@@ -1437,6 +1437,8 @@ let shopZoom = 0.35;
   }
   const shopAudio = typeof window.Audio === 'function' ? new window.Audio() : null;
   const SHOP_AUDIO_VOLUME = 0.48 * 0.8;
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  const mobileShopGainScale = isMobile ? 0.75 : 1.0;
   const shopAudioPaths = ['./media/shop_sound.mp3'];
   let shopAudioPathIndex = 0;
 
@@ -1748,7 +1750,7 @@ let shopZoom = 0.35;
     updateSpaceFullscreenButton();
   }
 
-  let audioCtx, analyser, muffleFilter, dataArray;
+  let audioCtx, analyser, muffleFilter, dataArray, shopAudioGain;
   function initAudio() {
     const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
     if (!audioCtx && aEl && AudioContextConstructor) {
@@ -1768,12 +1770,12 @@ let shopZoom = 0.35;
     }
   }
   let mainAudioFadeFrame = 0, shopAudioFadeFrame = 0, shopAudioPlayPending = false, shopAudioPlayRequest = 0;
-  function fadeMediaVolume(media, targetVolume, duration, onComplete) {
-    const startVolume = media.volume;
+  function fadeMediaVolume(media, targetVolume, duration, onComplete, volumeProperty = 'volume') {
+    const startVolume = media[volumeProperty];
     const startTime = performance.now();
     const timer = setInterval(() => {
       const progress = Math.min(1, (performance.now() - startTime) / duration);
-      media.volume = startVolume + (targetVolume - startVolume) * progress;
+      media[volumeProperty] = startVolume + (targetVolume - startVolume) * progress;
       if (progress >= 1) {
         clearInterval(timer);
         onComplete();
@@ -1784,10 +1786,10 @@ let shopZoom = 0.35;
   function fadeShopAudioTo(targetVolume, duration, pauseAtEnd = false) {
     if (!shopAudio) return;
     if (shopAudioFadeFrame) clearInterval(shopAudioFadeFrame);
-    shopAudioFadeFrame = fadeMediaVolume(shopAudio, targetVolume, duration, () => {
+    shopAudioFadeFrame = fadeMediaVolume(shopAudioGain ? shopAudioGain.gain : shopAudio, targetVolume * mobileShopGainScale, duration, () => {
       shopAudioFadeFrame = 0;
       if (pauseAtEnd) shopAudio.pause();
-    });
+    }, shopAudioGain ? 'value' : 'volume');
   }
   function startShopAudioFromUserGesture() {
     if (!shopAudio) return;
@@ -1797,10 +1799,25 @@ let shopZoom = 0.35;
     shopAudioPlayPending = false;
     shopAudio.muted = false;
     initAudio();
+    if (isMobile && audioCtx && !shopAudioGain) {
+      const source = audioCtx.createMediaElementSource(shopAudio);
+      shopAudioGain = audioCtx.createGain();
+      shopAudioGain.gain.value = shopAudio.volume * mobileShopGainScale;
+      source.connect(shopAudioGain);
+      shopAudioGain.connect(audioCtx.destination);
+      shopAudio.volume = 1;
+    } else if (isMobile && !audioCtx) {
+      console.warn('Web Audio is unavailable; shop volume control may not work on this device.');
+    }
     if (audioCtx && audioCtx.state === 'suspended') {
       audioCtx.resume().catch(error => console.warn('Audio context could not resume:', error));
     }
-    if (shopAudio.paused) shopAudio.volume = 0;
+    if (shopAudioGain) {
+      shopAudio.volume = 1;
+      if (shopAudio.paused) shopAudioGain.gain.value = 0;
+    } else if (shopAudio.paused) {
+      shopAudio.volume = 0;
+    }
     let playAttempt;
     try {
       playAttempt = shopAudio.play();
