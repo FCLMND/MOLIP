@@ -1648,55 +1648,28 @@ let shopZoom = 0.35;
     window.scrollTo(0, 0);
   }
   function toggleImmersiveMode() {
-    if (document.body.classList.contains('cinema-mode')) {
-      exitImmersiveMode();
-    } else {
-      enterCinemaMode();
-    }
-  }
-  function enterFullscreen() {
-    const fullscreenElement = getFullscreenElement();
-    const isVisualFullscreen = isFs &&
-      (document.body.classList.contains('native-fullscreen') || document.body.classList.contains('cinema-mode'));
-    if (isVisualFullscreen) {
-      exitFs(!(isSpaceFullscreen && fullscreenElement));
-      return;
-    }
-    if (fullscreenElement && isSpaceFullscreen) {
-      isFs = true;
-      showFullscreenVideo();
+    if (isFs) {
+      isFs = false;
+      if (fsWrap) fsWrap.classList.remove('active');
+      if (fsVideo && !fsVideo.paused) fsVideo.pause();
+      if (fsBtn) setControlLabel(fsBtn, 'immersive');
       scheduleCameraViewportUpdate();
       return;
     }
-    if (fullscreenElement) {
-      exitFs();
-      return;
-    }
-    const root = document.documentElement;
-    const isIPhone = /iPhone/i.test(navigator.userAgent) || /iPhone/i.test(navigator.platform);
-    if (isIPhone && !isStandalone &&
-        typeof root.requestFullscreen !== 'function' && typeof root.webkitRequestFullscreen !== 'function') {
-      showFullscreenHint();
-      return;
-    }
     isFs = true;
-    const requestFullscreen = root.requestFullscreen || root.webkitRequestFullscreen;
-    if (typeof requestFullscreen !== 'function') {
-      enterCinemaMode();
-      return;
+    if (fsWrap) fsWrap.classList.add('active');
+    if (fsVideo && fsCanvas && vEl && vEl.src) {
+      fsVideo.src = vEl.src;
+      fsVideo.currentTime = vEl.currentTime;
+      fsVideo.style.display = 'block';
+      fsCanvas.style.display = 'none';
+      if (!vEl.paused) playMedia(fsVideo);
+    } else if (fsVideo && fsCanvas) {
+      fsVideo.style.display = 'none';
+      fsCanvas.style.display = 'block';
     }
-    try {
-      const request = requestFullscreen.call(root);
-      if (request && typeof request.catch === 'function') {
-        request.catch(error => {
-          console.warn('Fullscreen request failed; using cinema mode:', error);
-          if (isFs && !getFullscreenElement()) enterCinemaMode();
-        });
-      }
-    } catch (error) {
-      console.warn('Fullscreen request failed; using cinema mode:', error);
-      enterCinemaMode();
-    }
+    if (fsBtn) setControlLabel(fsBtn, 'immersive');
+    scheduleCameraViewportUpdate();
   }
   if (fsBtn) fsBtn.addEventListener('click', toggleImmersiveMode);
   function exitFs(exitNativeFullscreen = true) {
@@ -1732,30 +1705,12 @@ let shopZoom = 0.35;
   }
   const exitFsBtn = document.getElementById('exit-fs-btn');
   if (exitFsBtn) exitFsBtn.addEventListener('click', () => {
-    if (document.body.classList.contains('cinema-mode')) exitImmersiveMode();
-    else exitFs();
+    if (isFs) toggleImmersiveMode();
   });
   function syncFullscreenState() {
-    const fullscreenElement = getFullscreenElement();
-    if (!fullscreenElement && isSpaceFullscreen) isSpaceFullscreen = false;
+    if (!getFullscreenElement()) isSpaceFullscreen = false;
     updateSpaceFullscreenButton();
-    if (fullscreenElement && isSpaceFullscreen) {
-      scheduleCameraViewportUpdate();
-      return;
-    }
-    if (fullscreenElement) {
-      isFs = true;
-      showFullscreenVideo();
-      scheduleCameraViewportUpdate();
-    } else if (document.body.classList.contains('native-fullscreen')) {
-      exitFs(false);
-    } else {
-      if (!document.body.classList.contains('cinema-mode')) {
-        isFs = false;
-        if (fsBtn) setControlLabel(fsBtn, 'immersive');
-      }
-      scheduleCameraViewportUpdate();
-    }
+    scheduleCameraViewportUpdate();
   }
   document.addEventListener('fullscreenchange', syncFullscreenState);
   document.addEventListener('webkitfullscreenchange', syncFullscreenState);
