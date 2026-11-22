@@ -1676,6 +1676,31 @@ let shopZoom = 0.35;
     scheduleCameraViewportUpdate();
   }
   if (fsBtn) fsBtn.addEventListener('click', toggleImmersiveMode);
+  const mobileImmersiveBtn = document.getElementById('mobile-immersive-btn');
+  if (mobileImmersiveBtn) {
+    const mobileImmersiveViewport = window.matchMedia('(max-width: 768px)');
+    function setMobileImmersiveMode(active) {
+      document.body.classList.toggle('mobile-visual-immersive', active);
+      mobileImmersiveBtn.setAttribute('aria-pressed', String(active));
+      mobileImmersiveBtn.setAttribute('aria-label', active ? 'Exit immersive 몰입모드 종료' : 'immersive 몰입모드');
+      if (active && !isFs) toggleImmersiveMode();
+      if (active && fsVideo && fsVideo.src && fsVideo.paused && vEl && vEl.paused) playMedia(fsVideo);
+      if (!active && isFs) {
+        pendingVideoPlayback.delete(fsVideo);
+        toggleImmersiveMode();
+      }
+    }
+    mobileImmersiveBtn.addEventListener('click', () => {
+      if (mobileImmersiveViewport.matches) {
+        setMobileImmersiveMode(!document.body.classList.contains('mobile-visual-immersive'));
+      }
+    });
+    window.addEventListener('resize', () => {
+      if (!mobileImmersiveViewport.matches && document.body.classList.contains('mobile-visual-immersive')) {
+        setMobileImmersiveMode(false);
+      }
+    });
+  }
   function exitFs(exitNativeFullscreen = true) {
     isFs = false;
     document.body.classList.remove('native-fullscreen');
