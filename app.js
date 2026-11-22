@@ -1849,9 +1849,10 @@ let shopZoom = 0.35;
     if (!playbackBtn) return;
     const media = isArchiveShopAudioActive() ? shopAudio : aEl;
     const isPlaying = Boolean(media && !media.paused);
-    setControlLabel(playbackBtn, isPlaying ? 'Pause' : 'Play');
-    const icon = playbackBtn.querySelector('.control-icon path');
-    if (icon) icon.setAttribute('d', isPlaying ? 'M8 5.5v13M16 5.5v13' : 'M8 5.5v13l10-6.5z');
+    const isAudible = isPlaying && !media.muted;
+    playbackBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+    const icon = playbackBtn.querySelector('.control-icon path:last-child');
+    if (icon) icon.setAttribute('d', isAudible ? 'M16 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12' : 'm17 9 4 6m0-6-4 6');
   }
   if (playbackBtn) {
     [aEl, shopAudio].forEach(media => {
@@ -1859,6 +1860,7 @@ let shopZoom = 0.35;
       media.addEventListener('play', updatePlaybackButton);
       media.addEventListener('pause', updatePlaybackButton);
       media.addEventListener('ended', updatePlaybackButton);
+      media.addEventListener('volumechange', updatePlaybackButton);
     });
     updatePlaybackButton();
     playbackBtn.addEventListener('click', () => {
